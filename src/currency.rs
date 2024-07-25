@@ -34,30 +34,36 @@ pub trait Currency {
 macro_rules! generate_currency {
     ($identifier:ident, $name:literal, $symbol:literal, $alphabetic_code:literal, $numeric_code:literal, $minor:literal, $fractions:literal) => {
         #[doc = concat!($name, " (", $symbol, ")")]
-        #[derive(Debug)]
+        #[derive(Clone, Copy, Debug)]
         pub struct $identifier();
-        impl Currency for $identifier {
+        impl $crate::currency::Currency for $identifier {
             #[must_use]
+            #[inline]
             fn get_name() -> &'static str {
                 $name
             }
             #[must_use]
+            #[inline]
             fn get_symbol() -> &'static str {
                 $symbol
             }
             #[must_use]
+            #[inline]
             fn get_alphabetic_code() -> &'static str {
                 $alphabetic_code
             }
             #[must_use]
+            #[inline]
             fn get_numeric_code() -> &'static str {
                 $numeric_code
             }
             #[must_use]
+            #[inline]
             fn get_minor() -> usize {
                 $minor
             }
             #[must_use]
+            #[inline]
             fn get_fractions() -> u16 {
                 $fractions
             }
@@ -67,7 +73,6 @@ macro_rules! generate_currency {
 
 #[rustfmt::skip]
 mod unformatted {
-    use super::Currency;
     generate_currency!(AED, "United Arab Emirates Dirham", "د.إ", "AED", "784", 2, 100);
     generate_currency!(AFN, "Afghan Afghani", "؋", "AFN", "971", 2, 100);
     generate_currency!(ALL, "Albanian Lek", "L", "ALL", "008", 2, 100);
