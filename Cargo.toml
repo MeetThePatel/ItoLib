@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 num = "0.4.3"
+
+[dev-dependencies]
+approx = "0.5.1"
