@@ -1,6 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{currency::Currency, money::Money};
+use crate::money::{Currency, Money};
 
 use num::Num;
 
@@ -21,6 +21,7 @@ where
     B: Currency,
     Q: Currency,
 {
+    #[must_use]
     pub fn new(rate: N) -> Self {
         Self {
             rate,
@@ -29,9 +30,24 @@ where
         }
     }
 
+    #[must_use]
+    #[inline]
+    pub fn get_base_currency(&self) -> B {
+        Default::default()
+    }
+    #[must_use]
+    #[inline]
+    pub fn get_quote_currency(&self) -> Q {
+        Default::default()
+    }
+
+    #[must_use]
+    #[inline]
     pub fn convert_to_base(&self, rhs: &Money<N, Q>) -> Money<N, B> {
         Money::new(rhs.amount / self.rate)
     }
+    #[must_use]
+    #[inline]
     pub fn convert_to_quote(&self, rhs: &Money<N, B>) -> Money<N, Q> {
         Money::new(rhs.amount * self.rate)
     }
@@ -40,8 +56,8 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::currency::{EUR, USD};
     use crate::macros::assert_approx_equal_Money;
+    use crate::money::currency::{EUR, USD};
     use crate::money::Money;
 
     use super::ExchangeRate;

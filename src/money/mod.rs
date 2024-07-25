@@ -1,10 +1,14 @@
+pub mod currency;
+pub use currency::Currency;
+
+pub mod exchange_rate;
+pub use exchange_rate::*;
+
 use std::{
     fmt::Display,
     marker::PhantomData,
     ops::{Add, Div, Mul, Sub},
 };
-
-use crate::currency::Currency;
 
 use num::traits::NumOps;
 
@@ -32,33 +36,44 @@ where
     }
 
     #[must_use]
-    pub fn get_currency_name(self) -> &'static str {
-        C::get_name()
+    #[inline]
+    pub fn get_currency(&self) -> C {
+        Default::default()
     }
 
     #[must_use]
-    pub fn get_currency_symbol(self) -> &'static str {
-        C::get_symbol()
+    #[inline]
+    pub fn get_currency_name(&self) -> &'static str {
+        self.get_currency().get_name()
+    }
+    #[must_use]
+    #[inline]
+    pub fn get_currency_symbol(&self) -> &'static str {
+        self.get_currency().get_symbol()
     }
 
     #[must_use]
-    pub fn get_currency_alphabetic_code() -> &'static str {
-        C::get_alphabetic_code()
+    #[inline]
+    pub fn get_currency_alphabetic_code(&self) -> &'static str {
+        self.get_currency().get_alphabetic_code()
     }
 
     #[must_use]
-    pub fn get_currency_numeric_code() -> &'static str {
-        C::get_numeric_code()
+    #[inline]
+    pub fn get_currency_numeric_code(&self) -> &'static str {
+        self.get_currency().get_numeric_code()
     }
 
     #[must_use]
-    pub fn get_currency_minor() -> usize {
-        C::get_minor()
+    #[inline]
+    pub fn get_currency_minor(&self) -> usize {
+        self.get_currency().get_minor()
     }
 
     #[must_use]
-    pub fn get_currency_fractions() -> u16 {
-        C::get_fractions()
+    #[inline]
+    pub fn get_currency_fractions(&self) -> u16 {
+        self.get_currency().get_fractions()
     }
 }
 
@@ -72,9 +87,9 @@ where
         write!(
             f,
             "{} {:.minor$}",
-            C::get_symbol(),
+            self.get_currency_symbol(),
             self.amount,
-            minor = C::get_minor()
+            minor = self.get_currency_minor()
         )
     }
 }
@@ -168,14 +183,13 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::{currency::USD, money::Money};
+    use crate::money::{currency::USD, Money};
 
     #[cfg(test)]
     mod arithmetic_operations {
         use crate::{
-            currency::USD,
             macros::{assert_approx_equal_Money, assert_approx_equal_f64},
-            money::Money,
+            money::{currency::USD, Money},
         };
 
         #[test]
@@ -261,5 +275,10 @@ mod tests {
         assert!(m2 >= m1);
         assert!(m1 < m2);
         assert!(m1 <= m2);
+    }
+
+    #[test]
+    fn get_currency() {
+        let m1: Money<f64, USD> = Money::new(41.34);
     }
 }

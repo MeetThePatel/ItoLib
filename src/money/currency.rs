@@ -1,70 +1,70 @@
-pub trait Currency {
+pub trait Currency: Default {
     /// Currency name.
     ///     e.g. United States Dollar
     #[must_use]
-    fn get_name() -> &'static str;
+    fn get_name(&self) -> &'static str;
 
     /// Currency symbol.
     ///     e.g. $
     #[must_use]
-    fn get_symbol() -> &'static str;
+    fn get_symbol(&self) -> &'static str;
 
     /// ISO 4217 currency code.
     ///     e.g. USD
     #[must_use]
-    fn get_alphabetic_code() -> &'static str;
+    fn get_alphabetic_code(&self) -> &'static str;
 
     /// ISO 4217 currency number.
     ///     e.g. 840
     #[must_use]
-    fn get_numeric_code() -> &'static str;
+    fn get_numeric_code(&self) -> &'static str;
 
     /// Minor units (digits after decimal places).
     ///     e.g. 2
     #[must_use]
-    fn get_minor() -> usize;
+    fn get_minor(&self) -> usize;
 
     /// Fractions per unit.
     ///     e.g. 100
     #[must_use]
-    fn get_fractions() -> u16;
+    fn get_fractions(&self) -> u16;
 }
 
 #[macro_export]
 macro_rules! generate_currency {
     ($identifier:ident, $name:literal, $symbol:literal, $alphabetic_code:literal, $numeric_code:literal, $minor:literal, $fractions:literal) => {
         #[doc = concat!($name, " (", $symbol, ")")]
-        #[derive(Clone, Copy, Debug)]
+        #[derive(Clone, Copy, Debug, Default)]
         pub struct $identifier();
-        impl $crate::currency::Currency for $identifier {
+        impl $crate::money::Currency for $identifier {
             #[must_use]
             #[inline]
-            fn get_name() -> &'static str {
+            fn get_name(&self) -> &'static str {
                 $name
             }
             #[must_use]
             #[inline]
-            fn get_symbol() -> &'static str {
+            fn get_symbol(&self) -> &'static str {
                 $symbol
             }
             #[must_use]
             #[inline]
-            fn get_alphabetic_code() -> &'static str {
+            fn get_alphabetic_code(&self) -> &'static str {
                 $alphabetic_code
             }
             #[must_use]
             #[inline]
-            fn get_numeric_code() -> &'static str {
+            fn get_numeric_code(&self) -> &'static str {
                 $numeric_code
             }
             #[must_use]
             #[inline]
-            fn get_minor() -> usize {
+            fn get_minor(&self) -> usize {
                 $minor
             }
             #[must_use]
             #[inline]
-            fn get_fractions() -> u16 {
+            fn get_fractions(&self) -> u16 {
                 $fractions
             }
         }
@@ -233,3 +233,14 @@ mod unformatted {
     generate_currency!(ZWL, "Zimbabwean Dollar", "Z$", "ZWL", "932", 2, 100);
 }
 pub use unformatted::*;
+
+#[cfg(test)]
+mod tests {
+    use super::USD;
+
+    #[test]
+    fn test() {
+        let x = USD::default();
+        println!("{:#?}", x);
+    }
+}
