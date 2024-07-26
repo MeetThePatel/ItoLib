@@ -1,6 +1,9 @@
 use std::{collections::BTreeMap, fmt::Display};
 
-use crate::money::{Currency, ExchangeRate, Money};
+use crate::{
+    macros::any_true,
+    money::{Currency, ExchangeRate, Money},
+};
 
 use num::Num;
 
@@ -77,15 +80,23 @@ where
             })
     }
 
-    pub fn contains_key<B, Q>(&self, base: &B, quote: &Q) -> bool
+    pub fn contains_key<B, Q>(&self, base: &B, quote: &Q) -> Option<(&str, &str)>
     where
         B: Currency,
         Q: Currency,
     {
         let base_code = base.get_alphabetic_code();
         let quote_code = quote.get_alphabetic_code();
-        self.exchange_rate_map
-            .contains_key(&(base_code, quote_code))
+        match any_true!(
+            self.exchange_rate_map
+                .contains_key(&(base_code, quote_code)),
+            self.exchange_rate_map
+                .contains_key(&(quote_code, base_code))
+        ) {
+            Some(0) => Some((base_code, quote_code)),
+            Some(1) => Some((quote_code, base_code)),
+            _ => None,
+        }
     }
 
     pub fn update<B, Q>(&mut self, rate: &ExchangeRate<N, B, Q>) -> Option<ExchangeRate<N, B, Q>>
@@ -186,8 +197,15 @@ mod tests {
         );
 
         // Test contains_key.
-        assert!(manager.contains_key(&GBP::default(), &USD::default()));
-        assert!(!manager.contains_key(&EUR::default(), &USD::default()));
+        assert_eq!(
+            manager.contains_key(&GBP::default(), &USD::default()),
+            Some(("GBP", "USD"))
+        );
+        assert_eq!(
+            manager.contains_key(&USD::default(), &GBP::default()),
+            Some(("GBP", "USD"))
+        );
+        assert_eq!(manager.contains_key(&EUR::default(), &USD::default()), None);
 
         // Test size
         manager.insert(&eurusd).unwrap();
