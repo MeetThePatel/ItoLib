@@ -128,7 +128,7 @@ where
     type Output = Self;
 
     fn add(self, rhs: Money<R, C>) -> Self::Output {
-        Money::new(self.amount + rhs.amount.into())
+        Self::new(self.amount + rhs.amount.into())
     }
 }
 
@@ -141,7 +141,7 @@ where
     type Output = Self;
 
     fn sub(self, rhs: Money<R, C>) -> Self::Output {
-        Money::new(self.amount - rhs.amount.into())
+        Self::new(self.amount - rhs.amount.into())
     }
 }
 
@@ -154,7 +154,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: R) -> Self::Output {
-        Money::new(self.amount * rhs.into())
+        Self::new(self.amount * rhs.into())
     }
 }
 

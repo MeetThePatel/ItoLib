@@ -30,6 +30,7 @@ pub trait Currency: Default {
     fn get_fractions(&self) -> u16;
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[macro_export]
 macro_rules! generate_currency {
     ($identifier:ident, $name:literal, $symbol:literal, $alphabetic_code:literal, $numeric_code:literal, $minor:literal, $fractions:literal) => {
@@ -241,6 +242,6 @@ mod tests {
     #[test]
     fn test() {
         let x = USD::default();
-        println!("{:#?}", x);
+        println!("{x:#?}");
     }
 }

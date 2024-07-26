@@ -22,7 +22,7 @@ where
     Q: Currency,
 {
     #[must_use]
-    pub fn new(rate: N) -> Self {
+    pub const fn new(rate: N) -> Self {
         Self {
             rate,
             quote_currency: PhantomData,

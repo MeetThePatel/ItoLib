@@ -61,7 +61,7 @@ macro_rules! assert_approx_equal_Money {
             $x,
             $y,
             $d
-        )
+        );
         assert_eq!($x.get_currency_name(), $y.get_currency_name());
     };
 }
