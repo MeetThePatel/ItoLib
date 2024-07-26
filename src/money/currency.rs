@@ -1,4 +1,4 @@
-pub trait Currency: Default {
+pub trait Currency: Default + Copy + Clone {
     /// Currency name.
     ///     e.g. United States Dollar
     #[must_use]

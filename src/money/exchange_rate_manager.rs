@@ -2,15 +2,13 @@ use std::{collections::BTreeMap, fmt::Display};
 
 use crate::{
     macros::any_true,
-    money::{Currency, ExchangeRate, Money},
+    money::{Currency, ExchangeRate, MonetaryNumber, Money},
 };
-
-use num::Num;
 
 #[derive(Debug, Default, Clone)]
 pub struct ExchangeRateManager<'a, N>
 where
-    N: Num + PartialOrd + Clone,
+    N: MonetaryNumber,
 {
     exchange_rate_map: BTreeMap<(&'a str, &'a str), N>,
 }
@@ -24,7 +22,7 @@ pub enum ExchangeRateManagerError {
 
 impl<'a, N> ExchangeRateManager<'a, N>
 where
-    N: Num + PartialOrd + Clone,
+    N: MonetaryNumber,
 {
     #[must_use]
     pub const fn new() -> Self {
@@ -36,7 +34,7 @@ where
 
 impl<'a, N> ExchangeRateManager<'a, N>
 where
-    N: Num + PartialOrd + Copy,
+    N: MonetaryNumber,
 {
     pub fn insert<B, Q>(
         &mut self,
@@ -155,7 +153,7 @@ where
 
 impl<'a, N> Display for ExchangeRateManager<'a, N>
 where
-    N: Num + PartialOrd + Clone + Display,
+    N: MonetaryNumber,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let _ = writeln!(f, "+-----------+----------------------+");

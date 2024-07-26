@@ -13,12 +13,12 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 
-use num::traits::NumOps;
+use num::Num;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Money<N, C>
 where
-    N: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber,
     C: Currency,
 {
     pub amount: N,
@@ -27,7 +27,7 @@ where
 
 impl<N, C> Money<N, C>
 where
-    N: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber,
     C: Currency,
 {
     #[must_use]
@@ -82,7 +82,7 @@ where
 
 impl<N, C> Display for Money<N, C>
 where
-    N: NumOps + PartialOrd + Display + Copy,
+    N: MonetaryNumber,
     C: Currency + Default,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -100,8 +100,8 @@ where
 impl<N, C, R> PartialEq<Money<R, C>> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps + PartialOrd + Copy + Clone,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     fn eq(&self, other: &Money<R, C>) -> bool {
         self.amount == other.amount.into()
@@ -111,8 +111,8 @@ where
 impl<N, C, R> PartialOrd<Money<R, C>> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps + PartialOrd + Copy + Clone,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     fn partial_cmp(&self, other: &Money<R, C>) -> Option<std::cmp::Ordering> {
         self.amount.partial_cmp(&(other.amount.into()))
@@ -122,8 +122,8 @@ where
 impl<N, C, R> Add<Money<R, C>> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     type Output = Self;
 
@@ -135,8 +135,8 @@ where
 impl<N, C, R> Sub<Money<R, C>> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     type Output = Self;
 
@@ -148,8 +148,8 @@ where
 impl<N, C, R> Mul<R> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps<N> + PartialOrd + Copy,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     type Output = Self;
 
@@ -161,8 +161,8 @@ where
 impl<N, C, R> Div<Money<R, C>> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy + From<R>,
-    R: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber + From<R>,
+    R: MonetaryNumber,
 {
     type Output = N;
 
@@ -174,7 +174,7 @@ where
 impl<N, C> Div<N> for Money<N, C>
 where
     C: Currency,
-    N: NumOps + PartialOrd + Copy,
+    N: MonetaryNumber,
 {
     type Output = Self;
 
@@ -183,6 +183,20 @@ where
         Self::new(self.amount / rhs)
     }
 }
+
+pub trait MonetaryNumber: Num + PartialOrd + Copy + Clone + Display {}
+impl MonetaryNumber for f32 {}
+impl MonetaryNumber for f64 {}
+impl MonetaryNumber for u8 {}
+impl MonetaryNumber for u16 {}
+impl MonetaryNumber for u32 {}
+impl MonetaryNumber for u64 {}
+impl MonetaryNumber for u128 {}
+impl MonetaryNumber for i8 {}
+impl MonetaryNumber for i16 {}
+impl MonetaryNumber for i32 {}
+impl MonetaryNumber for i64 {}
+impl MonetaryNumber for i128 {}
 
 #[cfg(test)]
 mod tests {

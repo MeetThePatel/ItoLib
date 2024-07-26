@@ -1,12 +1,10 @@
 use std::{fmt::Display, marker::PhantomData};
 
-use crate::money::{Currency, Money};
-
-use num::Num;
+use crate::money::{Currency, MonetaryNumber, Money};
 
 pub struct ExchangeRate<N, B, Q>
 where
-    N: Num + PartialOrd + Clone,
+    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
@@ -17,7 +15,7 @@ where
 
 impl<N, B, Q> ExchangeRate<N, B, Q>
 where
-    N: Num + PartialOrd + Copy,
+    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
@@ -55,7 +53,7 @@ where
 
 impl<N, B, Q> Display for ExchangeRate<N, B, Q>
 where
-    N: Num + PartialOrd + Copy + Display,
+    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
