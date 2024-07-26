@@ -4,6 +4,9 @@ pub use currency::Currency;
 pub mod exchange_rate;
 pub use exchange_rate::*;
 
+pub mod exchange_rate_manager;
+pub use exchange_rate_manager::*;
+
 use std::{
     fmt::Display,
     marker::PhantomData,
@@ -80,7 +83,7 @@ where
 impl<N, C> Display for Money<N, C>
 where
     N: NumOps + PartialOrd + Display + Copy,
-    C: Currency,
+    C: Currency + Default,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         // TODO: Add rounding method (according to ISO standards).
@@ -275,10 +278,5 @@ mod tests {
         assert!(m2 >= m1);
         assert!(m1 < m2);
         assert!(m1 <= m2);
-    }
-
-    #[test]
-    fn get_currency() {
-        let m1: Money<f64, USD> = Money::new(41.34);
     }
 }

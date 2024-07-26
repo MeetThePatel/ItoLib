@@ -1,4 +1,4 @@
-use std::marker::PhantomData;
+use std::{fmt::Display, marker::PhantomData};
 
 use crate::money::{Currency, Money};
 
@@ -10,7 +10,7 @@ where
     B: Currency,
     Q: Currency,
 {
-    rate: N,
+    pub rate: N,
     base_currency: PhantomData<B>,
     quote_currency: PhantomData<Q>,
 }
@@ -53,6 +53,23 @@ where
     }
 }
 
+impl<N, B, Q> Display for ExchangeRate<N, B, Q>
+where
+    N: Num + PartialOrd + Copy + Display,
+    B: Currency,
+    Q: Currency,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} {}/{}",
+            self.rate,
+            self.get_base_currency().get_alphabetic_code(),
+            self.get_quote_currency().get_alphabetic_code()
+        )
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -72,11 +89,17 @@ mod tests {
     }
 
     #[test]
-    fn test_quote_to_quote() {
+    fn test_base_to_quote() {
         let m1: Money<f64, EUR> = Money::new(10.0);
         let rate: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08372);
 
         let expected = Money::new(10.8372);
         assert_approx_equal_Money!(rate.convert_to_quote(&m1), expected);
+    }
+
+    #[test]
+    fn test_display() {
+        let rate: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08372);
+        assert_eq!(rate.to_string(), "1.08372 EUR/USD");
     }
 }

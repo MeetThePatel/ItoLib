@@ -34,7 +34,7 @@ pub trait Currency: Default {
 macro_rules! generate_currency {
     ($identifier:ident, $name:literal, $symbol:literal, $alphabetic_code:literal, $numeric_code:literal, $minor:literal, $fractions:literal) => {
         #[doc = concat!($name, " (", $symbol, ")")]
-        #[derive(Clone, Copy, Debug, Default)]
+        #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
         pub struct $identifier();
         impl $crate::money::Currency for $identifier {
             #[must_use]
