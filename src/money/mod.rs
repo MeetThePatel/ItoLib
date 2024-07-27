@@ -13,7 +13,7 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 
-use num::Num;
+use num::Float;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Money<N, C>
@@ -184,19 +184,9 @@ where
     }
 }
 
-pub trait MonetaryNumber: Num + PartialOrd + Copy + Clone + Display {}
+pub trait MonetaryNumber: Float + Clone + Display {}
 impl MonetaryNumber for f32 {}
 impl MonetaryNumber for f64 {}
-impl MonetaryNumber for u8 {}
-impl MonetaryNumber for u16 {}
-impl MonetaryNumber for u32 {}
-impl MonetaryNumber for u64 {}
-impl MonetaryNumber for u128 {}
-impl MonetaryNumber for i8 {}
-impl MonetaryNumber for i16 {}
-impl MonetaryNumber for i32 {}
-impl MonetaryNumber for i64 {}
-impl MonetaryNumber for i128 {}
 
 #[cfg(test)]
 mod tests {
@@ -279,7 +269,7 @@ mod tests {
     #[test]
     fn test_money_partial_eq() {
         let m1: Money<f64, USD> = Money::new(157.34);
-        let m2: Money<i32, USD> = Money::new(3);
+        let m2: Money<f32, USD> = Money::new(3.0);
         assert_ne!(m1, m2);
         assert_eq!(m1, m1);
     }
