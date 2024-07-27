@@ -5,6 +5,7 @@ use crate::instruments::options::OptionType;
 use crate::instruments::payoffs::{CallPutPayoff, Payoff};
 use crate::money::{Currency, MonetaryNumber, Money};
 
+#[derive(Debug, Copy, Clone)]
 pub struct VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
