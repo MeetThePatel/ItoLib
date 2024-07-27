@@ -1,31 +1,31 @@
 use std::fmt::Display;
 
-use crate::instruments::exercises::{EuropeanExercise, Exercise};
+use crate::instruments::exercises::{AmericanExercise, Exercise};
 use crate::instruments::options::{Option, OptionType};
 use crate::instruments::payoffs::{CallPutPayoff, Payoff, VanillaPayoff};
 use crate::money::{Currency, MonetaryNumber};
 
-pub struct EuropeanOption<N, C>
+pub struct AmericanOption<N, C>
 where
     N: MonetaryNumber,
     C: Currency,
 {
     payoff: VanillaPayoff<N, C>,
-    exercise: EuropeanExercise,
+    exercise: AmericanExercise,
 }
 
-impl<N, C> EuropeanOption<N, C>
+impl<N, C> AmericanOption<N, C>
 where
     N: MonetaryNumber,
     C: Currency,
 {
     #[must_use]
-    pub const fn new(payoff: VanillaPayoff<N, C>, exercise: EuropeanExercise) -> Self {
+    pub const fn new(payoff: VanillaPayoff<N, C>, exercise: AmericanExercise) -> Self {
         Self { payoff, exercise }
     }
 }
 
-impl<N, C> Option<N, C> for EuropeanOption<N, C>
+impl<N, C> Option<N, C> for AmericanOption<N, C>
 where
     N: MonetaryNumber,
     C: Currency,
@@ -43,15 +43,15 @@ where
     }
 }
 
-impl<N, C> Display for EuropeanOption<N, C>
+impl<N, C> Display for AmericanOption<N, C>
 where
     N: MonetaryNumber,
     C: Currency,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let type_letter = match self.get_option_type() {
-            OptionType::CALL => "C (E)",
-            OptionType::PUT => "P (E)",
+            OptionType::CALL => "C (A)",
+            OptionType::PUT => "P (A)",
         };
         write!(
             f,
@@ -65,23 +65,23 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::instruments::exercises::EuropeanExercise;
-    use crate::instruments::options::{EuropeanOption, OptionType};
+    use crate::instruments::exercises::AmericanExercise;
+    use crate::instruments::options::{AmericanOption, OptionType};
     use crate::instruments::payoffs::VanillaPayoff;
     use crate::money::{currency::USD, Money};
 
     use chrono::Utc;
 
     #[test]
-    fn test_european_option_display() {
+    fn test_american_option_display() {
         let strike_price: Money<f64, USD> = Money::new(30.00);
         let option_type = OptionType::CALL;
         let payoff = VanillaPayoff::new(strike_price, option_type);
 
-        let exercise = EuropeanExercise::new(Utc::now());
+        let exercise = AmericanExercise::new(Utc::now());
 
-        let option = EuropeanOption::new(payoff, exercise);
+        let option = AmericanOption::new(payoff, exercise);
 
-        assert_eq!(option.to_string(), "24/07/27 $ 30.00 C (E)");
+        assert_eq!(option.to_string(), "24/07/27 $ 30.00 C (A)");
     }
 }
