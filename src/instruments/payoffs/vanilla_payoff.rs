@@ -1,74 +1,83 @@
 use std::fmt::Display;
+use std::marker::PhantomData;
 
 use crate::instruments::options::OptionType;
 use crate::instruments::payoffs::{CallPutPayoff, Payoff};
-use crate::money::MonetaryNumber;
+use crate::money::{Currency, MonetaryNumber, Money};
 
-pub struct VanillaPayoff<N>
+pub struct VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
+    C: Currency,
 {
-    strike: N,
+    strike: Money<N, C>,
     option_type: OptionType,
+    currency: PhantomData<C>,
 }
 
-impl<N> VanillaPayoff<N>
+impl<N, C> VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
+    C: Currency,
 {
     #[must_use]
     #[inline]
-    pub const fn new(strike: N, option_type: OptionType) -> Self {
+    pub const fn new(strike: Money<N, C>, option_type: OptionType) -> Self {
         Self {
             strike,
             option_type,
+            currency: PhantomData,
         }
     }
 
     #[must_use]
     #[inline]
-    pub const fn get_strike(&self) -> N {
+    pub const fn get_strike(&self) -> Money<N, C> {
         self.strike
     }
 }
 
-impl<N> Display for VanillaPayoff<N>
+impl<N, C> Display for VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
+    C: Currency,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // TODO: When reworking ISO rounding, update this.
-        write!(f, "{:.4} {}", self.get_strike(), self.get_option_type())
+        write!(f, "{} {}", self.get_strike(), self.get_option_type())
     }
 }
 
-impl<N> Payoff<N> for VanillaPayoff<N>
+impl<N, C> Payoff<N> for VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
+    C: Currency,
 {
-    fn apply(&self, price: N) -> N {
+    type PayoffNumberType = Money<N, C>;
+
+    fn apply(&self, price: Self::PayoffNumberType) -> Self::PayoffNumberType {
         match self.option_type {
             OptionType::CALL => {
-                if (price - self.strike) > N::zero() {
+                if price > self.strike {
                     price - self.strike
                 } else {
-                    N::zero()
+                    Money::new(N::zero())
                 }
             }
             OptionType::PUT => {
-                if (self.strike - price) > N::zero() {
+                if self.strike > price {
                     self.strike - price
                 } else {
-                    N::zero()
+                    Money::new(N::zero())
                 }
             }
         }
     }
 }
 
-impl<N> CallPutPayoff<N> for VanillaPayoff<N>
+impl<N, C> CallPutPayoff<N, C> for VanillaPayoff<N, C>
 where
     N: MonetaryNumber,
+    C: Currency,
 {
     fn get_option_type(&self) -> OptionType {
         self.option_type
@@ -77,27 +86,30 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::instruments::{
-        options::OptionType,
-        payoffs::{CallPutPayoff, Payoff},
+    use crate::{
+        instruments::{
+            options::OptionType,
+            payoffs::{CallPutPayoff, Payoff},
+        },
+        money::{currency::USD, Money},
     };
 
     use super::VanillaPayoff;
 
     #[test]
     fn test_vanilla_payoff() {
-        let x: VanillaPayoff<f64> = VanillaPayoff::new(100.0, OptionType::CALL);
+        let x: VanillaPayoff<f64, USD> = VanillaPayoff::new(Money::new(100.0), OptionType::CALL);
         assert_eq!(x.get_option_type(), OptionType::CALL);
-        assert_eq!(x.get_strike(), 100.0);
-        assert_eq!(x.apply(105.0), 5.0);
-        assert_eq!(x.apply(95.0), 0.0);
-        assert_eq!(x.to_string(), "100.0000 CALL");
+        assert_eq!(x.get_strike(), Money::new(100.0));
+        assert_eq!(x.apply(Money::new(105.0)), Money::new(5.0));
+        assert_eq!(x.apply(Money::new(95.0)), Money::new(0.0));
+        assert_eq!(x.to_string(), "$ 100.00 CALL");
 
-        let x: VanillaPayoff<f64> = VanillaPayoff::new(100.0, OptionType::PUT);
+        let x: VanillaPayoff<f64, USD> = VanillaPayoff::new(Money::new(100.0), OptionType::PUT);
         assert_eq!(x.get_option_type(), OptionType::PUT);
-        assert_eq!(x.get_strike(), 100.0);
-        assert_eq!(x.apply(105.0), 0.0);
-        assert_eq!(x.apply(95.0), 5.0);
-        assert_eq!(x.to_string(), "100.0000 PUT");
+        assert_eq!(x.get_strike(), Money::new(100.0));
+        assert_eq!(x.apply(Money::new(105.0)), Money::new(0.0));
+        assert_eq!(x.apply(Money::new(95.0)), Money::new(5.0));
+        assert_eq!(x.to_string(), "$ 100.00 PUT");
     }
 }
