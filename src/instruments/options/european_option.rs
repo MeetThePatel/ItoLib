@@ -19,7 +19,8 @@ where
     N: MonetaryNumber,
     C: Currency,
 {
-    pub fn new(payoff: VanillaPayoff<N, C>, exercise: EuropeanExercise) -> Self {
+    #[must_use]
+    pub const fn new(payoff: VanillaPayoff<N, C>, exercise: EuropeanExercise) -> Self {
         Self { payoff, exercise }
     }
 }

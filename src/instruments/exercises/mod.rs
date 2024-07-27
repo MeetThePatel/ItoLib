@@ -1,6 +1,9 @@
 mod european_exercise;
 pub use european_exercise::EuropeanExercise;
 
+mod american_exercise;
+pub use american_exercise::AmericanExercise;
+
 use chrono::{DateTime, Utc};
 
 pub trait Exercise {
