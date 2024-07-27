@@ -1,5 +1,5 @@
-pub mod option;
-pub use option::*;
+mod option;
+pub use option::{Option, OptionType};
 
-pub mod european_option;
-pub use european_option::*;
+mod european_option;
+pub use european_option::EuropeanOption;

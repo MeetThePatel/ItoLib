@@ -1,11 +1,11 @@
 pub mod currency;
 pub use currency::Currency;
 
-pub mod exchange_rate;
-pub use exchange_rate::*;
+mod exchange_rate;
+pub use exchange_rate::ExchangeRate;
 
-pub mod exchange_rate_manager;
-pub use exchange_rate_manager::*;
+mod exchange_rate_manager;
+pub use exchange_rate_manager::{ExchangeRateManager, ExchangeRateManagerError};
 
 use std::{
     fmt::Display,

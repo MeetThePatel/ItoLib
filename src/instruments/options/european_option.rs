@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
+use crate::instruments::exercises::{EuropeanExercise, Exercise};
 use crate::instruments::options::{Option, OptionType};
-use crate::instruments::{CallPutPayoff, EuropeanExercise, Exercise, Payoff, VanillaPayoff};
+use crate::instruments::payoffs::{CallPutPayoff, Payoff, VanillaPayoff};
 use crate::money::{Currency, MonetaryNumber};
 
 pub struct EuropeanOption<N, C>
@@ -63,8 +64,9 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::instruments::exercises::EuropeanExercise;
     use crate::instruments::options::{EuropeanOption, OptionType};
-    use crate::instruments::{payoffs::VanillaPayoff, EuropeanExercise};
+    use crate::instruments::payoffs::VanillaPayoff;
     use crate::money::{currency::USD, Money};
 
     use chrono::Utc;

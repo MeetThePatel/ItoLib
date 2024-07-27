@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-use crate::instruments::{Exercise, Payoff};
+use crate::instruments::exercises::Exercise;
+use crate::instruments::payoffs::Payoff;
 use crate::money::{Currency, MonetaryNumber};
 
 // TODO: Make this subtrait of Instrument.

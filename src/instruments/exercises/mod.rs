@@ -1,5 +1,5 @@
-pub mod european_exercise;
-pub use european_exercise::*;
+mod european_exercise;
+pub use european_exercise::EuropeanExercise;
 
 use chrono::{DateTime, Utc};
 

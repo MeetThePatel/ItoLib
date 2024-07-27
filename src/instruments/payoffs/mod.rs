@@ -1,5 +1,5 @@
-pub mod vanilla_payoff;
-pub use vanilla_payoff::*;
+mod vanilla_payoff;
+pub use vanilla_payoff::VanillaPayoff;
 
 use crate::instruments::options::OptionType;
 use crate::money::{Currency, MonetaryNumber};

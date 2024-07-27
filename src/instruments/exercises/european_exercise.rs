@@ -1,4 +1,4 @@
-use crate::instruments::Exercise;
+use crate::instruments::exercises::Exercise;
 
 use chrono::{DateTime, Utc};
 
@@ -30,7 +30,7 @@ impl Exercise for EuropeanExercise {
 
 #[cfg(test)]
 mod tests {
-    use crate::instruments::{EuropeanExercise, Exercise};
+    use crate::instruments::exercises::{EuropeanExercise, Exercise};
 
     use chrono::Utc;
 
