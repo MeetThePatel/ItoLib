@@ -5,3 +5,7 @@ pub mod money;
 
 #[macro_use]
 pub mod macros;
+
+
+pub mod compounding;
+pub mod time;

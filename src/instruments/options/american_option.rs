@@ -70,7 +70,7 @@ mod tests {
     use crate::instruments::payoffs::VanillaPayoff;
     use crate::money::{currency::USD, Money};
 
-    use chrono::Utc;
+    use chrono::{DateTime, NaiveDateTime, Utc};
 
     #[test]
     fn test_american_option_display() {
@@ -78,7 +78,11 @@ mod tests {
         let option_type = OptionType::CALL;
         let payoff = VanillaPayoff::new(strike_price, option_type);
 
-        let exercise = AmericanExercise::new(Utc::now());
+        let date: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
+            NaiveDateTime::parse_from_str("24/07/27 00:00:00", "%y/%m/%d %H:%M:%S").unwrap(),
+            Utc,
+        );
+        let exercise = AmericanExercise::new(date);
 
         let option = AmericanOption::new(payoff, exercise);
 
