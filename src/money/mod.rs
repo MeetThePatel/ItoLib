@@ -7,31 +7,31 @@ pub use exchange_rate::ExchangeRate;
 mod exchange_rate_manager;
 pub use exchange_rate_manager::{ExchangeRateManager, ExchangeRateManagerError};
 
+use num::Zero;
+
 use std::{
     fmt::Display,
     marker::PhantomData,
     ops::{Add, Div, Mul, Sub},
 };
 
-use num::Float;
+use crate::MonetaryNumber;
 
 #[derive(Copy, Clone, Debug)]
-pub struct Money<N, C>
+pub struct Money<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
-    pub amount: N,
+    pub amount: MonetaryNumber,
     currency: PhantomData<C>,
 }
 
-impl<N, C> Money<N, C>
+impl<C> Money<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     #[must_use]
-    pub const fn new(amount: N) -> Self {
+    pub const fn new(amount: MonetaryNumber) -> Self {
         Self {
             amount,
             currency: PhantomData,
@@ -80,9 +80,8 @@ where
     }
 }
 
-impl<N, C> Display for Money<N, C>
+impl<C> Display for Money<C>
 where
-    N: MonetaryNumber,
     C: Currency + Default,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -97,59 +96,50 @@ where
     }
 }
 
-impl<N, C, R> PartialEq<Money<R, C>> for Money<N, C>
+impl<C> PartialEq for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
 {
-    fn eq(&self, other: &Money<R, C>) -> bool {
-        self.amount == other.amount.into()
+    fn eq(&self, other: &Self) -> bool {
+        self.amount == other.amount
     }
 }
 
-impl<N, C, R> PartialOrd<Money<R, C>> for Money<N, C>
+impl<C> PartialOrd for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
 {
-    fn partial_cmp(&self, other: &Money<R, C>) -> Option<std::cmp::Ordering> {
-        self.amount.partial_cmp(&(other.amount.into()))
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.amount.partial_cmp(&other.amount)
     }
 }
 
-impl<N, C, R> Add<Money<R, C>> for Money<N, C>
+impl<C> Add for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
 {
     type Output = Self;
 
-    fn add(self, rhs: Money<R, C>) -> Self::Output {
-        Self::new(self.amount + rhs.amount.into())
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.amount + rhs.amount)
     }
 }
 
-impl<N, C, R> Sub<Money<R, C>> for Money<N, C>
+impl<C> Sub for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
 {
     type Output = Self;
 
-    fn sub(self, rhs: Money<R, C>) -> Self::Output {
-        Self::new(self.amount - rhs.amount.into())
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::new(self.amount - rhs.amount)
     }
 }
 
-impl<N, C, R> Mul<R> for Money<N, C>
+impl<C, R> Mul<R> for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
+    R: Into<MonetaryNumber>,
 {
     type Output = Self;
 
@@ -158,35 +148,42 @@ where
     }
 }
 
-impl<N, C, R> Div<Money<R, C>> for Money<N, C>
+impl<C> Div<Money<C>> for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber + From<R>,
-    R: MonetaryNumber,
 {
-    type Output = N;
+    type Output = MonetaryNumber;
 
-    fn div(self, rhs: Money<R, C>) -> Self::Output {
-        self.amount / rhs.amount.into()
+    fn div(self, rhs: Self) -> Self::Output {
+        self.amount / rhs.amount
     }
 }
 
-impl<N, C> Div<N> for Money<N, C>
+impl<C, R> Div<R> for Money<C>
 where
     C: Currency,
-    N: MonetaryNumber,
+    R: Into<MonetaryNumber>,
 {
     type Output = Self;
 
     #[inline]
-    fn div(self, rhs: N) -> Self::Output {
-        Self::new(self.amount / rhs)
+    fn div(self, rhs: R) -> Self::Output {
+        Self::new(self.amount / rhs.into())
     }
 }
 
-pub trait MonetaryNumber: Float + Clone + Display {}
-impl MonetaryNumber for f32 {}
-impl MonetaryNumber for f64 {}
+impl<C> Zero for Money<C>
+where
+    C: Currency,
+{
+    fn zero() -> Self {
+        Self::new(MonetaryNumber::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        (self.amount - MonetaryNumber::zero()).abs() < MonetaryNumber::EPSILON
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -201,7 +198,7 @@ mod tests {
 
         #[test]
         fn test_money_add() {
-            let m1: Money<f64, USD> = Money::new(5.0);
+            let m1: Money<USD> = Money::new(5.0);
             let m2 = Money::new(6.3);
 
             let expected = Money::new(11.3);
@@ -210,7 +207,7 @@ mod tests {
 
         #[test]
         fn test_money_sub() {
-            let m1: Money<f64, USD> = Money::new(12.94);
+            let m1: Money<USD> = Money::new(12.94);
             let m2 = Money::new(6.3);
 
             let expected = Money::new(6.64);
@@ -219,7 +216,7 @@ mod tests {
 
         #[test]
         fn test_money_mul_int() {
-            let m: Money<f64, USD> = Money::new(5.0);
+            let m: Money<USD> = Money::new(5.0);
 
             let expected = Money::new(20.0);
             assert_approx_equal_Money!(m * 4.0, expected);
@@ -227,7 +224,7 @@ mod tests {
 
         #[test]
         fn test_money_mul_float() {
-            let m: Money<f64, USD> = Money::new(5.0);
+            let m: Money<USD> = Money::new(5.0);
 
             let expected = Money::new(7.5);
             assert_approx_equal_Money!(m * 1.5, expected);
@@ -235,8 +232,8 @@ mod tests {
 
         #[test]
         fn test_money_div_money() {
-            let m1: Money<f64, USD> = Money::new(6.0);
-            let m2: Money<f64, USD> = Money::new(6.0);
+            let m1: Money<USD> = Money::new(6.0);
+            let m2: Money<USD> = Money::new(6.0);
 
             let expected = 1.0;
             assert_approx_equal_f64!(m1 / m2, expected);
@@ -244,7 +241,7 @@ mod tests {
 
         #[test]
         fn test_money_div_int() {
-            let m: Money<f64, USD> = Money::new(6.0);
+            let m: Money<USD> = Money::new(6.0);
 
             let expected = Money::new(2.0);
             assert_approx_equal_Money!(m / 3.0, expected);
@@ -252,7 +249,7 @@ mod tests {
 
         #[test]
         fn test_money_div_float() {
-            let m: Money<f64, USD> = Money::new(6.0);
+            let m: Money<USD> = Money::new(6.0);
 
             let expected = Money::new(2.0);
             assert_approx_equal_Money!(m / 3.0, expected);
@@ -260,7 +257,7 @@ mod tests {
     }
     #[test]
     fn test_money_display() {
-        let m: Money<f64, USD> = Money::new(4.32123);
+        let m: Money<USD> = Money::new(4.32123);
 
         let expected = "$ 4.32";
         assert_eq!(m.to_string(), expected);
@@ -268,16 +265,16 @@ mod tests {
 
     #[test]
     fn test_money_partial_eq() {
-        let m1: Money<f64, USD> = Money::new(157.34);
-        let m2: Money<f32, USD> = Money::new(3.0);
+        let m1: Money<USD> = Money::new(157.34);
+        let m2: Money<USD> = Money::new(3.0);
         assert_ne!(m1, m2);
         assert_eq!(m1, m1);
     }
 
     #[test]
     fn test_money_partial_ord() {
-        let m1: Money<f64, USD> = Money::new(41.34);
-        let m2: Money<f64, USD> = Money::new(324.3);
+        let m1: Money<USD> = Money::new(41.34);
+        let m2: Money<USD> = Money::new(324.3);
         assert!(m2 > m1);
         assert!(m2 >= m1);
         assert!(m1 < m2);

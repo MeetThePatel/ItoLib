@@ -2,17 +2,16 @@ use std::fmt::Display;
 
 use crate::instruments::exercises::Exercise;
 use crate::instruments::payoffs::Payoff;
-use crate::money::{Currency, MonetaryNumber};
+use crate::money::Currency;
 
 // TODO: Make this subtrait of Instrument.
-pub trait Option<N, C>
+pub trait Option<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     fn get_option_type(&self) -> OptionType;
 
-    fn get_payoff(&self) -> impl Payoff<N>;
+    fn get_payoff(&self) -> impl Payoff;
 
     fn get_exercise(&self) -> impl Exercise;
 }

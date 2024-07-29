@@ -3,38 +3,35 @@ use std::fmt::Display;
 use crate::instruments::exercises::{EuropeanExercise, Exercise};
 use crate::instruments::options::{Option, OptionType};
 use crate::instruments::payoffs::{CallPutPayoff, Payoff, VanillaPayoff};
-use crate::money::{Currency, MonetaryNumber};
+use crate::money::Currency;
 
-pub struct EuropeanOption<N, C>
+pub struct EuropeanOption<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
-    payoff: VanillaPayoff<N, C>,
+    payoff: VanillaPayoff<C>,
     exercise: EuropeanExercise,
 }
 
-impl<N, C> EuropeanOption<N, C>
+impl<C> EuropeanOption<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     #[must_use]
-    pub const fn new(payoff: VanillaPayoff<N, C>, exercise: EuropeanExercise) -> Self {
+    pub const fn new(payoff: VanillaPayoff<C>, exercise: EuropeanExercise) -> Self {
         Self { payoff, exercise }
     }
 }
 
-impl<N, C> Option<N, C> for EuropeanOption<N, C>
+impl<C> Option<C> for EuropeanOption<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     fn get_option_type(&self) -> OptionType {
         self.payoff.get_option_type()
     }
 
-    fn get_payoff(&self) -> impl Payoff<N> {
+    fn get_payoff(&self) -> impl Payoff {
         self.payoff
     }
 
@@ -43,9 +40,8 @@ where
     }
 }
 
-impl<N, C> Display for EuropeanOption<N, C>
+impl<C> Display for EuropeanOption<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -74,7 +70,7 @@ mod tests {
 
     #[test]
     fn test_european_option_display() {
-        let strike_price: Money<f64, USD> = Money::new(30.00);
+        let strike_price: Money<USD> = Money::new(30.00);
         let option_type = OptionType::CALL;
         let payoff = VanillaPayoff::new(strike_price, option_type);
 

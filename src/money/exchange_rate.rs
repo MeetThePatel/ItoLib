@@ -1,26 +1,25 @@
 use std::{fmt::Display, marker::PhantomData};
 
-use crate::money::{Currency, MonetaryNumber, Money};
+use crate::money::{Currency, Money};
+use crate::types::MonetaryNumber;
 
-pub struct ExchangeRate<N, B, Q>
+pub struct ExchangeRate<B, Q>
 where
-    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
-    pub rate: N,
+    pub rate: MonetaryNumber,
     base_currency: PhantomData<B>,
     quote_currency: PhantomData<Q>,
 }
 
-impl<N, B, Q> ExchangeRate<N, B, Q>
+impl<B, Q> ExchangeRate<B, Q>
 where
-    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
     #[must_use]
-    pub const fn new(rate: N) -> Self {
+    pub const fn new(rate: MonetaryNumber) -> Self {
         Self {
             rate,
             quote_currency: PhantomData,
@@ -41,19 +40,18 @@ where
 
     #[must_use]
     #[inline]
-    pub fn convert_to_base(&self, rhs: &Money<N, Q>) -> Money<N, B> {
+    pub fn convert_to_base(&self, rhs: &Money<Q>) -> Money<B> {
         Money::new(rhs.amount / self.rate)
     }
     #[must_use]
     #[inline]
-    pub fn convert_to_quote(&self, rhs: &Money<N, B>) -> Money<N, Q> {
+    pub fn convert_to_quote(&self, rhs: &Money<B>) -> Money<Q> {
         Money::new(rhs.amount * self.rate)
     }
 }
 
-impl<N, B, Q> Display for ExchangeRate<N, B, Q>
+impl<B, Q> Display for ExchangeRate<B, Q>
 where
-    N: MonetaryNumber,
     B: Currency,
     Q: Currency,
 {
@@ -79,8 +77,8 @@ mod tests {
 
     #[test]
     fn test_quote_to_base() {
-        let m1: Money<f64, USD> = Money::new(10.0);
-        let rate: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08372);
+        let m1: Money<USD> = Money::new(10.0);
+        let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
         let expected = Money::new(9.227_475_731_738_826);
         assert_approx_equal_Money!(rate.convert_to_base(&m1), expected);
@@ -88,8 +86,8 @@ mod tests {
 
     #[test]
     fn test_base_to_quote() {
-        let m1: Money<f64, EUR> = Money::new(10.0);
-        let rate: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08372);
+        let m1: Money<EUR> = Money::new(10.0);
+        let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
         let expected = Money::new(10.8372);
         assert_approx_equal_Money!(rate.convert_to_quote(&m1), expected);
@@ -97,7 +95,7 @@ mod tests {
 
     #[test]
     fn test_display() {
-        let rate: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08372);
+        let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
         assert_eq!(rate.to_string(), "1.08372 EUR/USD");
     }
 }

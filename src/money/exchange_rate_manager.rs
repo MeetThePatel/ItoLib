@@ -1,16 +1,13 @@
-use std::{collections::BTreeMap, fmt::Display};
+use std::collections::BTreeMap;
+use std::fmt::Display;
 
-use crate::{
-    macros::any_true,
-    money::{Currency, ExchangeRate, MonetaryNumber, Money},
-};
+use crate::macros::any_true;
+use crate::money::{Currency, ExchangeRate, Money};
+use crate::types::MonetaryNumber;
 
 #[derive(Debug, Default, Clone)]
-pub struct ExchangeRateManager<'a, N>
-where
-    N: MonetaryNumber,
-{
-    exchange_rate_map: BTreeMap<(&'a str, &'a str), N>,
+pub struct ExchangeRateManager<'a> {
+    exchange_rate_map: BTreeMap<(&'a str, &'a str), MonetaryNumber>,
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -20,10 +17,7 @@ pub enum ExchangeRateManagerError {
     ExchangeRateNotFound,
 }
 
-impl<'a, N> ExchangeRateManager<'a, N>
-where
-    N: MonetaryNumber,
-{
+impl<'a> ExchangeRateManager<'a> {
     #[must_use]
     pub const fn new() -> Self {
         Self {
@@ -32,13 +26,10 @@ where
     }
 }
 
-impl<'a, N> ExchangeRateManager<'a, N>
-where
-    N: MonetaryNumber,
-{
+impl<'a> ExchangeRateManager<'a> {
     pub fn insert<B, Q>(
         &mut self,
-        rate: &ExchangeRate<N, B, Q>,
+        rate: &ExchangeRate<B, Q>,
     ) -> Result<(), ExchangeRateManagerError>
     where
         B: Currency,
@@ -64,7 +55,7 @@ where
         &self,
         base: &B,
         quote: &Q,
-    ) -> Result<ExchangeRate<N, B, Q>, ExchangeRateManagerError>
+    ) -> Result<ExchangeRate<B, Q>, ExchangeRateManagerError>
     where
         B: Currency,
         Q: Currency,
@@ -97,7 +88,7 @@ where
         }
     }
 
-    pub fn update<B, Q>(&mut self, rate: &ExchangeRate<N, B, Q>) -> Option<ExchangeRate<N, B, Q>>
+    pub fn update<B, Q>(&mut self, rate: &ExchangeRate<B, Q>) -> Option<ExchangeRate<B, Q>>
     where
         B: Currency,
         Q: Currency,
@@ -109,7 +100,7 @@ where
             .map(ExchangeRate::new)
     }
 
-    pub fn remove<B, Q>(&mut self, base: &B, quote: &Q) -> Option<ExchangeRate<N, B, Q>>
+    pub fn remove<B, Q>(&mut self, base: &B, quote: &Q) -> Option<ExchangeRate<B, Q>>
     where
         B: Currency,
         Q: Currency,
@@ -132,9 +123,9 @@ where
 
     pub fn convert<C1, C2>(
         &self,
-        amount: &Money<N, C1>,
+        amount: &Money<C1>,
         _target_currency: &C2,
-    ) -> Result<Money<N, C2>, ExchangeRateManagerError>
+    ) -> Result<Money<C2>, ExchangeRateManagerError>
     where
         C1: Currency,
         C2: Currency,
@@ -151,10 +142,7 @@ where
     }
 }
 
-impl<'a, N> Display for ExchangeRateManager<'a, N>
-where
-    N: MonetaryNumber,
-{
+impl<'a> Display for ExchangeRateManager<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let _ = writeln!(f, "+-----------+----------------------+");
         let _ = writeln!(f, "| {:^9} | {:>20} |", "Pair", "Rate");
@@ -183,9 +171,9 @@ mod tests {
 
     #[test]
     fn test_exchange_rate_manager_operations() {
-        let mut manager: ExchangeRateManager<f64> = ExchangeRateManager::new();
-        let gbpusd: ExchangeRate<f64, GBP, USD> = ExchangeRate::new(1.28510);
-        let eurusd: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08564);
+        let mut manager: ExchangeRateManager = ExchangeRateManager::new();
+        let gbpusd: ExchangeRate<GBP, USD> = ExchangeRate::new(1.28510);
+        let eurusd: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08564);
 
         // Test insert.
         assert!(manager.insert(&gbpusd).is_ok());
@@ -214,8 +202,8 @@ mod tests {
         assert_approx_equal_f64!(rate.rate, 1.28510_f64);
 
         // Test convert to base.
-        let m1: Money<f64, USD> = Money::new(1.0);
-        let expected: Money<f64, GBP> = Money::new(0.778_149_56);
+        let m1: Money<USD> = Money::new(1.0);
+        let expected: Money<GBP> = Money::new(0.778_149_56);
         assert_approx_equal_Money!(
             manager.convert(&m1, &GBP::default()).unwrap(),
             expected,
@@ -223,8 +211,8 @@ mod tests {
         );
 
         // Test convert to quote.
-        let m2: Money<f64, GBP> = Money::new(1.0);
-        let expected: Money<f64, USD> = Money::new(1.28510);
+        let m2: Money<GBP> = Money::new(1.0);
+        let expected: Money<USD> = Money::new(1.28510);
         assert_approx_equal_Money!(
             manager.convert(&m2, &USD::default()).unwrap(),
             expected,
@@ -232,7 +220,7 @@ mod tests {
         );
 
         // Test update.
-        let gbpusd: ExchangeRate<f64, GBP, USD> = ExchangeRate::new(1.28512);
+        let gbpusd: ExchangeRate<GBP, USD> = ExchangeRate::new(1.28512);
         manager.update(&gbpusd);
         let rate = manager.get(&GBP::default(), &USD::default()).unwrap();
         assert_approx_equal_f64!(rate.rate, 1.28512_f64);
@@ -248,12 +236,12 @@ mod tests {
 
     #[test]
     fn test_exchange_rate_manager_display() {
-        let gbpusd: ExchangeRate<f64, GBP, USD> = ExchangeRate::new(1.28510);
-        let eurusd: ExchangeRate<f64, EUR, USD> = ExchangeRate::new(1.08485);
-        let gbpeur: ExchangeRate<f64, GBP, EUR> = ExchangeRate::new(1.1872);
-        let usdjpy: ExchangeRate<f64, USD, JPY> = ExchangeRate::new(153.6380);
+        let gbpusd: ExchangeRate<GBP, USD> = ExchangeRate::new(1.28510);
+        let eurusd: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08485);
+        let gbpeur: ExchangeRate<GBP, EUR> = ExchangeRate::new(1.1872);
+        let usdjpy: ExchangeRate<USD, JPY> = ExchangeRate::new(153.6380);
 
-        let mut manager: ExchangeRateManager<f64> = ExchangeRateManager::new();
+        let mut manager: ExchangeRateManager = ExchangeRateManager::new();
         let _ = manager.insert(&gbpusd);
         let _ = manager.insert(&gbpeur);
         let _ = manager.insert(&eurusd);

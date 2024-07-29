@@ -1,29 +1,29 @@
 use std::fmt::Display;
 use std::marker::PhantomData;
 
+use num::Zero;
+
 use crate::instruments::options::OptionType;
 use crate::instruments::payoffs::{CallPutPayoff, Payoff};
-use crate::money::{Currency, MonetaryNumber, Money};
+use crate::money::{Currency, Money};
 
 #[derive(Debug, Copy, Clone)]
-pub struct VanillaPayoff<N, C>
+pub struct VanillaPayoff<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
-    strike: Money<N, C>,
+    strike: Money<C>,
     option_type: OptionType,
     currency: PhantomData<C>,
 }
 
-impl<N, C> VanillaPayoff<N, C>
+impl<C> VanillaPayoff<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     #[must_use]
     #[inline]
-    pub const fn new(strike: Money<N, C>, option_type: OptionType) -> Self {
+    pub const fn new(strike: Money<C>, option_type: OptionType) -> Self {
         Self {
             strike,
             option_type,
@@ -33,14 +33,13 @@ where
 
     #[must_use]
     #[inline]
-    pub const fn get_strike(&self) -> Money<N, C> {
+    pub const fn get_strike(&self) -> Money<C> {
         self.strike
     }
 }
 
-impl<N, C> Display for VanillaPayoff<N, C>
+impl<C> Display for VanillaPayoff<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -48,12 +47,11 @@ where
     }
 }
 
-impl<N, C> Payoff<N> for VanillaPayoff<N, C>
+impl<C> Payoff for VanillaPayoff<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
-    type PayoffNumberType = Money<N, C>;
+    type PayoffNumberType = Money<C>;
 
     fn apply(&self, price: Self::PayoffNumberType) -> Self::PayoffNumberType {
         match self.option_type {
@@ -61,23 +59,22 @@ where
                 if price > self.strike {
                     price - self.strike
                 } else {
-                    Money::new(N::zero())
+                    Money::zero()
                 }
             }
             OptionType::PUT => {
                 if self.strike > price {
                     self.strike - price
                 } else {
-                    Money::new(N::zero())
+                    Money::zero()
                 }
             }
         }
     }
 }
 
-impl<N, C> CallPutPayoff<N, C> for VanillaPayoff<N, C>
+impl<C> CallPutPayoff<C> for VanillaPayoff<C>
 where
-    N: MonetaryNumber,
     C: Currency,
 {
     fn get_option_type(&self) -> OptionType {
@@ -99,14 +96,14 @@ mod tests {
 
     #[test]
     fn test_vanilla_payoff() {
-        let x: VanillaPayoff<f64, USD> = VanillaPayoff::new(Money::new(100.0), OptionType::CALL);
+        let x: VanillaPayoff<USD> = VanillaPayoff::new(Money::new(100.0), OptionType::CALL);
         assert_eq!(x.get_option_type(), OptionType::CALL);
         assert_eq!(x.get_strike(), Money::new(100.0));
         assert_eq!(x.apply(Money::new(105.0)), Money::new(5.0));
         assert_eq!(x.apply(Money::new(95.0)), Money::new(0.0));
         assert_eq!(x.to_string(), "$ 100.00 CALL");
 
-        let x: VanillaPayoff<f64, USD> = VanillaPayoff::new(Money::new(100.0), OptionType::PUT);
+        let x: VanillaPayoff<USD> = VanillaPayoff::new(Money::new(100.0), OptionType::PUT);
         assert_eq!(x.get_option_type(), OptionType::PUT);
         assert_eq!(x.get_strike(), Money::new(100.0));
         assert_eq!(x.apply(Money::new(105.0)), Money::new(0.0));
