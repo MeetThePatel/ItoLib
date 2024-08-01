@@ -15,7 +15,7 @@ use std::{
     ops::{Add, Div, Mul, Sub},
 };
 
-use crate::MonetaryNumber;
+use crate::types::MonetaryNumber;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Money<C>
@@ -148,17 +148,6 @@ where
     }
 }
 
-impl<C> Div<Money<C>> for Money<C>
-where
-    C: Currency,
-{
-    type Output = MonetaryNumber;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        self.amount / rhs.amount
-    }
-}
-
 impl<C, R> Div<R> for Money<C>
 where
     C: Currency,
@@ -168,7 +157,7 @@ where
 
     #[inline]
     fn div(self, rhs: R) -> Self::Output {
-        Self::new(self.amount / rhs.into())
+        Money::new(self.amount / rhs.into())
     }
 }
 
@@ -185,6 +174,15 @@ where
     }
 }
 
+impl<C> From<Money<C>> for MonetaryNumber
+where
+    C: Currency,
+{
+    fn from(val: Money<C>) -> Self {
+        val.amount
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::money::{currency::USD, Money};
@@ -192,7 +190,7 @@ mod tests {
     #[cfg(test)]
     mod arithmetic_operations {
         use crate::{
-            macros::{assert_approx_equal_Money, assert_approx_equal_f64},
+            macros::assert_approx_equal_Money,
             money::{currency::USD, Money},
         };
 
@@ -235,16 +233,8 @@ mod tests {
             let m1: Money<USD> = Money::new(6.0);
             let m2: Money<USD> = Money::new(6.0);
 
-            let expected = 1.0;
-            assert_approx_equal_f64!(m1 / m2, expected);
-        }
-
-        #[test]
-        fn test_money_div_int() {
-            let m: Money<USD> = Money::new(6.0);
-
-            let expected = Money::new(2.0);
-            assert_approx_equal_Money!(m / 3.0, expected);
+            let expected: Money<USD> = Money::new(1.0);
+            assert_approx_equal_Money!(m1 / m2, expected);
         }
 
         #[test]
