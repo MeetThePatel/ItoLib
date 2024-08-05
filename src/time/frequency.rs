@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[repr(u32)]
 pub enum Frequency {
     Once = 0,
     Annual = 1,
@@ -14,7 +13,6 @@ pub enum Frequency {
     Biweekly = 26,
     Weekly = 52,
     Daily = 365,
-    Other(u32),
 }
 
 impl Display for Frequency {
@@ -31,7 +29,6 @@ impl Display for Frequency {
             Frequency::Biweekly => "Biweekly",
             Frequency::Weekly => "Weekly",
             Frequency::Daily => "Daily",
-            Frequency::Other(f) => &format!("Other({})", f),
         };
         write!(f, "{}", output)
     }
