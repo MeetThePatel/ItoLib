@@ -59,7 +59,7 @@ where
 {
     /// Discount factor implied by the rate at time $t$.
     #[must_use]
-    pub fn discount_factor(&self, year_fraction: DayCountFraction<D>) -> DiscountFactor {
+    pub fn discount_factor(&self, year_fraction: &DayCountFraction<D>) -> DiscountFactor {
         1.0 / self.compound_factor(year_fraction)
     }
 
@@ -71,11 +71,11 @@ where
     ///
     /// Continuous: $e^{rt}$
     #[must_use]
-    pub fn compound_factor(&self, year_fraction: DayCountFraction<D>) -> CompoundFactor {
+    pub fn compound_factor(&self, year_fraction: &DayCountFraction<D>) -> CompoundFactor {
         match self.compounding {
-            Compounding::Simple(_) => 1.0 + self.rate * year_fraction.get_fraction(),
-            Compounding::Compounding(freq) => (1.0 + self.rate / freq as i32 as f64)
-                .powf(freq as i32 as f64 * year_fraction.get_fraction()),
+            Compounding::Simple(_) => self.rate.mul_add(year_fraction.get_fraction(), 1.0),
+            Compounding::Compounding(freq) => (1.0 + self.rate / f64::from(freq as i32))
+                .powf(f64::from(freq as i32) * year_fraction.get_fraction()),
             Compounding::Continuous => f64::exp(self.rate * year_fraction.get_fraction()),
         }
     }
@@ -93,7 +93,7 @@ where
 
 pub fn implied_rate_from_compound_factor<C, D>(
     compound_factor: CompoundFactor,
-    day_count_fraction: DayCountFraction<D>,
+    day_count_fraction: &DayCountFraction<D>,
     day_count_convention: D,
     compounding: Compounding,
 ) -> Option<InterestRate<C, D>>
@@ -112,7 +112,7 @@ where
             })
         }
         Compounding::Compounding(f) => {
-            let f = f as u32 as f64;
+            let f = f64::from(f as u32);
             let r = (compound_factor.powf(1.0 / (f * day_count_fraction.get_fraction())) - 1.0) * f;
             Some(InterestRate {
                 rate: r,

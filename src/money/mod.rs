@@ -157,7 +157,7 @@ where
 
     #[inline]
     fn div(self, rhs: R) -> Self::Output {
-        Money::new(self.amount / rhs.into())
+        Self::new(self.amount / rhs.into())
     }
 }
 

@@ -15,12 +15,20 @@ where
     fn get_max_datetime(&self) -> DateTime<Utc>;
 
     /// Ensure that the term structure is applicable to the date.
-    fn validate_datetime(&self, dt: DateTime<Utc>) -> bool;
+    fn validate_datetime(&self, dt: DateTime<Utc>) -> TermStructureDateTimeValidity;
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[non_exhaustive]
 #[derive(Debug)]
 pub enum TermStructureError {
     InvalidDateTime,
     T2LessThanT1,
+}
+
+#[allow(clippy::module_name_repetitions)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum TermStructureDateTimeValidity {
+    Invalid = 0,
+    Valid = 1,
 }

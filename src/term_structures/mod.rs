@@ -1,5 +1,5 @@
 pub mod term_structure;
-pub use term_structure::{TermStructure, TermStructureError};
+pub use term_structure::{TermStructure, TermStructureDateTimeValidity, TermStructureError};
 
 pub mod yield_term_structure;
 pub use yield_term_structure::YieldTermStructure;

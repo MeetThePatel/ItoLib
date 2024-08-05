@@ -12,9 +12,9 @@ pub enum Compounding {
 impl Display for Compounding {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let output = match self {
-            Compounding::Simple(f) => &format!("Simple({f})"),
-            Compounding::Compounding(f) => &format!("Compounding({f})"),
-            Compounding::Continuous => "Continuous",
+            Self::Simple(f) => &format!("Simple({f})"),
+            Self::Compounding(f) => &format!("Compounding({f})"),
+            Self::Continuous => "Continuous",
         };
         write!(f, "{output}")
     }

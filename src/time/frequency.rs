@@ -18,18 +18,18 @@ pub enum Frequency {
 impl Display for Frequency {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let output = match self {
-            Frequency::Once => "Once",
-            Frequency::Annual => "Annual",
-            Frequency::Semiannual => "SemiAnnual",
-            Frequency::EveryFourthMonth => "EveryFourthMonth",
-            Frequency::Quarterly => "Quarterly",
-            Frequency::Bimonthly => "Bimonthly",
-            Frequency::Monthly => "Monthly",
-            Frequency::EveryFourthWeek => "EveryFourthWeek",
-            Frequency::Biweekly => "Biweekly",
-            Frequency::Weekly => "Weekly",
-            Frequency::Daily => "Daily",
+            Self::Once => "Once",
+            Self::Annual => "Annual",
+            Self::Semiannual => "SemiAnnual",
+            Self::EveryFourthMonth => "EveryFourthMonth",
+            Self::Quarterly => "Quarterly",
+            Self::Bimonthly => "Bimonthly",
+            Self::Monthly => "Monthly",
+            Self::EveryFourthWeek => "EveryFourthWeek",
+            Self::Biweekly => "Biweekly",
+            Self::Weekly => "Weekly",
+            Self::Daily => "Daily",
         };
-        write!(f, "{}", output)
+        write!(f, "{output}")
     }
 }
