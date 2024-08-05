@@ -1,23 +1,38 @@
+use std::marker::PhantomData;
+
 use crate::compounding::Compounding;
+use crate::money::Currency;
 use crate::types::{CompoundFactor, DiscountFactor, Percentage};
 
 use day_count_conventions::{DayCountFraction, DayCounter};
 
-// TODO: Make Interest Rate generic over currency C.
 #[derive(Debug, Copy, Clone)]
-pub struct InterestRate<D>
+pub struct InterestRate<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     rate: Percentage,
     day_counter: D,
     compounding: Compounding,
+    _marker: PhantomData<C>,
 }
 
-impl<D> InterestRate<D>
+impl<C, D> InterestRate<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
+    #[must_use]
+    pub const fn new(rate: Percentage, day_counter: D, compounding: Compounding) -> Self {
+        Self {
+            rate,
+            day_counter,
+            compounding,
+            _marker: PhantomData,
+        }
+    }
+
     #[inline]
     #[must_use]
     pub const fn get_rate(&self) -> Percentage {
@@ -37,8 +52,9 @@ where
     }
 }
 
-impl<D> InterestRate<D>
+impl<C, D> InterestRate<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     /// Discount factor implied by the rate at time $t$.
@@ -65,8 +81,9 @@ where
     }
 }
 
-impl<D> PartialEq for InterestRate<D>
+impl<C, D> PartialEq for InterestRate<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     fn eq(&self, other: &Self) -> bool {
@@ -74,13 +91,14 @@ where
     }
 }
 
-pub fn implied_rate_from_compound_factor<D>(
+pub fn implied_rate_from_compound_factor<C, D>(
     compound_factor: CompoundFactor,
     day_count_fraction: DayCountFraction<D>,
     day_count_convention: D,
     compounding: Compounding,
-) -> Option<InterestRate<D>>
+) -> Option<InterestRate<C, D>>
 where
+    C: Currency,
     D: DayCounter,
 {
     match compounding {
@@ -90,6 +108,7 @@ where
                 rate: r,
                 day_counter: day_count_convention,
                 compounding,
+                _marker: PhantomData,
             })
         }
         Compounding::Compounding(f) => {
@@ -99,6 +118,7 @@ where
                 rate: r,
                 day_counter: day_count_convention,
                 compounding,
+                _marker: PhantomData,
             })
         }
         Compounding::Continuous => {
@@ -107,6 +127,7 @@ where
                 rate: r,
                 day_counter: day_count_convention,
                 compounding,
+                _marker: PhantomData,
             })
         }
     }

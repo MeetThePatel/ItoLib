@@ -1,23 +1,26 @@
 use crate::interest_rate::{implied_rate_from_compound_factor, InterestRate};
+use crate::money::Currency;
 use crate::term_structures::{TermStructure, TermStructureError, YieldTermStructure};
 use crate::types::DiscountFactor;
 
 use chrono::{DateTime, Utc};
 use day_count_conventions::{DayCountFraction, DayCounter};
 
-pub struct FlatForwardTermStructure<D>
+pub struct FlatForwardTermStructure<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     pub reference_date: DateTime<Utc>,
-    pub rate: InterestRate<D>,
+    pub rate: InterestRate<C, D>,
 }
 
-impl<D> FlatForwardTermStructure<D>
+impl<C, D> FlatForwardTermStructure<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
-    pub fn new(reference_date: DateTime<Utc>, rate: InterestRate<D>) -> Self {
+    pub fn new(reference_date: DateTime<Utc>, rate: InterestRate<C, D>) -> Self {
         Self {
             reference_date,
             rate,
@@ -25,8 +28,9 @@ where
     }
 }
 
-impl<D> TermStructure<D> for FlatForwardTermStructure<D>
+impl<C, D> TermStructure<D> for FlatForwardTermStructure<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     fn get_reference_date(&self) -> DateTime<Utc> {
@@ -42,8 +46,9 @@ where
     }
 }
 
-impl<D> YieldTermStructure<D> for FlatForwardTermStructure<D>
+impl<C, D> YieldTermStructure<C, D> for FlatForwardTermStructure<C, D>
 where
+    C: Currency,
     D: DayCounter,
 {
     fn discount_factor(&self, t: DateTime<Utc>) -> Result<DiscountFactor, TermStructureError> {
@@ -59,7 +64,7 @@ where
         Ok(self.rate.discount_factor(year_fraction))
     }
 
-    fn zero_rate(&self, t: DateTime<Utc>) -> Result<InterestRate<D>, TermStructureError> {
+    fn zero_rate(&self, t: DateTime<Utc>) -> Result<InterestRate<C, D>, TermStructureError> {
         if self.validate_datetime(t) {
             return Err(TermStructureError::InvalidDateTime);
         }
@@ -87,7 +92,7 @@ where
         &self,
         t1: DateTime<Utc>,
         t2: DateTime<Utc>,
-    ) -> Result<InterestRate<D>, TermStructureError> {
+    ) -> Result<InterestRate<C, D>, TermStructureError> {
         if self.validate_datetime(t1) {
             return Err(TermStructureError::InvalidDateTime);
         }
