@@ -78,7 +78,7 @@ impl From<Epoch> for DateTime {
 impl From<DateTime> for i64 {
     #[allow(clippy::cast_possible_truncation)]
     fn from(value: DateTime) -> Self {
-        value.0.to_utc_seconds() as i64
+        value.0.to_utc_seconds() as Self
     }
 }
 impl From<DateTime> for f64 {
@@ -89,7 +89,7 @@ impl From<DateTime> for f64 {
 
 /// `DateTime` + `Duration`
 impl Add<Duration> for DateTime {
-    type Output = DateTime;
+    type Output = Self;
 
     fn add(self, rhs: Duration) -> Self::Output {
         Self(self.0.add(*rhs))

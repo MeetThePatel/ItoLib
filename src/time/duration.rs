@@ -48,7 +48,7 @@ impl DerefMut for Duration {
 }
 
 /// Duration + Duration
-impl Add<Duration> for Duration {
+impl Add<Self> for Duration {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -57,7 +57,7 @@ impl Add<Duration> for Duration {
 }
 /// Duration + Unit
 impl Add<Unit> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn add(self, rhs: Unit) -> Self::Output {
         Self(self.0 + rhs)
@@ -73,7 +73,7 @@ impl Add<Duration> for Unit {
 }
 
 /// Duration - Duration
-impl Sub<Duration> for Duration {
+impl Sub<Self> for Duration {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -82,7 +82,7 @@ impl Sub<Duration> for Duration {
 }
 /// Duration - Unit
 impl Sub<Unit> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn sub(self, rhs: Unit) -> Self::Output {
         Self(self.0 - rhs)
@@ -91,7 +91,7 @@ impl Sub<Unit> for Duration {
 
 /// Duration * f64
 impl Mul<f64> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn mul(self, rhs: f64) -> Self::Output {
         Self(self.0 * rhs)
@@ -107,7 +107,7 @@ impl Mul<Duration> for f64 {
 }
 /// Duration * i64
 impl Mul<i64> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn mul(self, rhs: i64) -> Self::Output {
         Self(self.0 * rhs)
@@ -122,9 +122,18 @@ impl Mul<Duration> for i64 {
     }
 }
 
+/// Duration / Duration
+impl Div<Self> for Duration {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        Self::new_from_millis(self.to_unit(Unit::Millisecond) / rhs.to_unit(Unit::Millisecond))
+    }
+}
+
 /// Duration / f64
 impl Div<f64> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn div(self, rhs: f64) -> Self::Output {
         Self(self.0 / rhs)
@@ -132,7 +141,7 @@ impl Div<f64> for Duration {
 }
 /// Duration / i64
 impl Div<i64> for Duration {
-    type Output = Duration;
+    type Output = Self;
 
     fn div(self, rhs: i64) -> Self::Output {
         Self(self.0 / rhs)

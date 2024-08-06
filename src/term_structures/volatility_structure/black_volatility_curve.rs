@@ -53,8 +53,8 @@ where
     }
 
     fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
-        if dt >= <BlackVolatilityCurve as TermStructure<D>>::get_reference_date(self)
-            && dt <= <BlackVolatilityCurve as TermStructure<D>>::get_max_datetime(self)
+        if dt >= <Self as TermStructure<D>>::get_reference_date(self)
+            && dt <= <Self as TermStructure<D>>::get_max_datetime(self)
         {
             TermStructureDateTimeValidity::Valid
         } else {
