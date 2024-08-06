@@ -1,7 +1,5 @@
 pub mod term_structure;
 pub use term_structure::{TermStructure, TermStructureDateTimeValidity, TermStructureError};
 
-pub mod yield_term_structure;
-pub use yield_term_structure::YieldTermStructure;
-
-pub mod flat_forward_term_structure;
+pub mod volatility_structure;
+pub mod yield_structure;

@@ -13,3 +13,5 @@ pub mod compounding;
 pub mod time;
 
 pub mod types;
+
+pub mod math;

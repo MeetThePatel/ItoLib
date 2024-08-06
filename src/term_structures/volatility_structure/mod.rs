@@ -18,3 +18,5 @@ pub use black_volatility_term_structure::BlackVolatilityTermStructure;
 
 pub mod black_constant_volatility_term_structure;
 pub use black_constant_volatility_term_structure::BlackConstantVolatilityTermStructure;
+
+pub mod black_volatility_curve;

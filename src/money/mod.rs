@@ -7,12 +7,12 @@ pub use exchange_rate::ExchangeRate;
 mod exchange_rate_manager;
 pub use exchange_rate_manager::{ExchangeRateManager, ExchangeRateManagerError};
 
-use num::Zero;
+use num::{traits::NumOps, Zero};
 
 use std::{
     fmt::Display,
     marker::PhantomData,
-    ops::{Add, Div, Mul, Sub},
+    ops::{Add, Div, Mul, Rem, Sub},
 };
 
 use crate::types::MonetaryNumber;
@@ -158,6 +158,18 @@ where
     #[inline]
     fn div(self, rhs: R) -> Self::Output {
         Self::new(self.amount / rhs.into())
+    }
+}
+
+impl<C, R> Rem<R> for Money<C>
+where
+    C: Currency,
+    R: Into<MonetaryNumber>,
+{
+    type Output = Self;
+
+    fn rem(self, rhs: R) -> Self::Output {
+        Self::new(self.amount % rhs.into())
     }
 }
 

@@ -33,3 +33,10 @@ pub enum TermStructureDateTimeValidity {
     Invalid = 0,
     Valid = 1,
 }
+
+#[allow(clippy::module_name_repetitions)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum TermStructureStrikeValidity {
+    Invalid = 0,
+    Valid = 1,
+}

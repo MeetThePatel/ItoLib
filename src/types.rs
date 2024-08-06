@@ -13,3 +13,11 @@ pub type DiscountFactor = f64;
 #[cfg(feature = "high_precision")]
 pub type CompoundFactor = rust_decimal::Decimal;
 pub type CompoundFactor = f64;
+
+#[cfg(feature = "high_precision")]
+pub type Volatility = rust_decimal::Decimal;
+pub type Volatility = f64;
+
+#[cfg(feature = "high_precision")]
+pub type Strike = rust_decimal::Decimal;
+pub type Strike = f64;
