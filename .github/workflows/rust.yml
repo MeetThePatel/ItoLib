@@ -16,15 +16,23 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - uses: actions-rs/toolchain@v1
+
     - name: Build
       run: cargo build --verbose
+
     - name: Clippy
       run: cargo clippy --verbose
+
     - name: Run tests
       run: cargo test --verbose
+
+    - name: rust-grcov
+      uses: actions-rs/grcov@v0.1
+
     - name: Codecov
       uses: codecov/codecov-action@v4
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
       with:
         verbose: true
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
