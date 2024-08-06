@@ -3,9 +3,9 @@ use crate::money::Currency;
 use crate::term_structures::{
     TermStructure, TermStructureDateTimeValidity, TermStructureError, YieldTermStructure,
 };
+use crate::time::DateTime;
 use crate::types::DiscountFactor;
 
-use chrono::{DateTime, Utc};
 use day_count_conventions::{DayCountFraction, DayCounter};
 
 pub struct FlatForwardTermStructure<C, D>
@@ -13,7 +13,7 @@ where
     C: Currency,
     D: DayCounter,
 {
-    pub reference_date: DateTime<Utc>,
+    pub reference_date: DateTime,
     pub rate: InterestRate<C, D>,
 }
 
@@ -23,7 +23,7 @@ where
     D: DayCounter,
 {
     #[must_use]
-    pub const fn new(reference_date: DateTime<Utc>, rate: InterestRate<C, D>) -> Self {
+    pub const fn new(reference_date: DateTime, rate: InterestRate<C, D>) -> Self {
         Self {
             reference_date,
             rate,
@@ -36,16 +36,15 @@ where
     C: Currency,
     D: DayCounter,
 {
-    fn get_reference_date(&self) -> DateTime<Utc> {
+    fn get_reference_date(&self) -> DateTime {
         self.reference_date
     }
 
-    fn get_max_datetime(&self) -> DateTime<Utc> {
-        DateTime::<Utc>::MAX_UTC
+    fn get_max_datetime(&self) -> DateTime {
+        DateTime::new_from_ymd(9999, 12, 31)
     }
 
-    // TODO: Turn bool -> enum
-    fn validate_datetime(&self, dt: DateTime<Utc>) -> TermStructureDateTimeValidity {
+    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
         if dt >= self.reference_date && dt <= self.get_max_datetime() {
             TermStructureDateTimeValidity::Valid
         } else {
@@ -59,7 +58,7 @@ where
     C: Currency,
     D: DayCounter,
 {
-    fn discount_factor(&self, t: DateTime<Utc>) -> Result<DiscountFactor, TermStructureError> {
+    fn discount_factor(&self, t: DateTime) -> Result<DiscountFactor, TermStructureError> {
         if self.validate_datetime(t) == TermStructureDateTimeValidity::Invalid {
             return Err(TermStructureError::InvalidDateTime);
         }
@@ -67,7 +66,7 @@ where
         let mut year_fraction = self
             .rate
             .get_day_counter()
-            .day_count_fraction(&self.reference_date.date_naive(), &t.date_naive());
+            .day_count_fraction(&self.reference_date, &t);
         if year_fraction.get_fraction() == 0.0 {
             year_fraction = DayCountFraction::new(10e-8);
         }
@@ -75,7 +74,7 @@ where
         Ok(self.rate.discount_factor(&year_fraction))
     }
 
-    fn zero_rate(&self, t: DateTime<Utc>) -> Result<InterestRate<C, D>, TermStructureError> {
+    fn zero_rate(&self, t: DateTime) -> Result<InterestRate<C, D>, TermStructureError> {
         if self.validate_datetime(t) == TermStructureDateTimeValidity::Invalid {
             return Err(TermStructureError::InvalidDateTime);
         }
@@ -85,7 +84,7 @@ where
         let mut day_count_fraction = self
             .rate
             .get_day_counter()
-            .day_count_fraction(&self.get_reference_date().date_naive(), &t.date_naive());
+            .day_count_fraction(&self.get_reference_date(), &t);
 
         if day_count_fraction.get_fraction() == 0.0 {
             day_count_fraction = DayCountFraction::new(10e-8);
@@ -105,8 +104,8 @@ where
 
     fn forward_rate(
         &self,
-        t1: DateTime<Utc>,
-        t2: DateTime<Utc>,
+        t1: DateTime,
+        t2: DateTime,
     ) -> Result<InterestRate<C, D>, TermStructureError> {
         if self.validate_datetime(t1) == TermStructureDateTimeValidity::Invalid {
             return Err(TermStructureError::InvalidDateTime);
@@ -123,11 +122,11 @@ where
         let yf1 = self
             .rate
             .get_day_counter()
-            .day_count_fraction(&self.reference_date.date_naive(), &t1.date_naive());
+            .day_count_fraction(&self.reference_date, &t1);
         let yf2 = self
             .rate
             .get_day_counter()
-            .day_count_fraction(&self.reference_date.date_naive(), &t2.date_naive());
+            .day_count_fraction(&self.reference_date, &t2);
 
         let day_count_fraction = DayCountFraction::new(yf2.get_fraction() - yf1.get_fraction());
 
@@ -145,13 +144,16 @@ where
 
 #[cfg(test)]
 mod tests {
-    use chrono::{DateTime, NaiveDate, NaiveTime, Utc};
     use day_count_conventions::Actual365Fixed;
 
     use crate::{
-        compounding::Compounding, interest_rate::InterestRate, money::currency::USD,
-        term_structures::flat_forward_term_structure::FlatForwardTermStructure,
-        term_structures::YieldTermStructure,
+        compounding::Compounding,
+        interest_rate::InterestRate,
+        money::currency::USD,
+        term_structures::{
+            flat_forward_term_structure::FlatForwardTermStructure, YieldTermStructure,
+        },
+        time::DateTime,
     };
 
     #[test]
@@ -160,26 +162,9 @@ mod tests {
         let comp = Compounding::Continuous;
         let flat_rate: InterestRate<USD, _> = InterestRate::new(0.045, dcc, comp);
 
-        let ref_date = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2024, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year_7_month: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 8, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
+        let ref_date = DateTime::new_from_ymd(2024, 1, 1);
+        let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
+        let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
         let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
 
@@ -211,26 +196,9 @@ mod tests {
         let comp = Compounding::Continuous;
         let flat_rate: InterestRate<USD, _> = InterestRate::new(0.045, dcc, comp);
 
-        let ref_date = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2024, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year_7_month: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 8, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
+        let ref_date = DateTime::new_from_ymd(2024, 1, 1);
+        let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
+        let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
         let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
 
@@ -264,26 +232,9 @@ mod tests {
         let comp = Compounding::Continuous;
         let flat_rate: InterestRate<USD, _> = InterestRate::new(0.045, dcc, comp);
 
-        let ref_date = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2024, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 1, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
-
-        let ref_date_plus_1_year_7_month: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-            NaiveDate::from_ymd_opt(2025, 8, 1)
-                .unwrap()
-                .and_time(NaiveTime::from_hms_opt(0, 0, 0).unwrap()),
-            Utc,
-        );
+        let ref_date = DateTime::new_from_ymd(2024, 1, 1);
+        let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
+        let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
         let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
 

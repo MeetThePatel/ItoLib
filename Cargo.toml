@@ -4,8 +4,8 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-chrono = "0.4.38"
-day_count_conventions = "0.1.4"
+day_count_conventions = { version = "0.1.5", features = ["hifitime"] }
+hifitime = "3.9.0"
 num = "0.4.3"
 rust_decimal = { version = "1.35.0", optional = true }
 rust_decimal_macros = { version = "1.35.0", optional = true }

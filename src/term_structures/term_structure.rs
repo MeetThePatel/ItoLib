@@ -1,5 +1,6 @@
-use chrono::{DateTime, Utc};
 use day_count_conventions::DayCounter;
+
+use crate::time::DateTime;
 
 pub trait TermStructure<D>
 where
@@ -9,13 +10,13 @@ where
     // fn get_calendar(&self) -> Calendar;
 
     /// The datetime at which the discount factor is equal to 1.0.
-    fn get_reference_date(&self) -> DateTime<Utc>;
+    fn get_reference_date(&self) -> DateTime;
 
     /// The latest datetime for which the term structure applies to.
-    fn get_max_datetime(&self) -> DateTime<Utc>;
+    fn get_max_datetime(&self) -> DateTime;
 
     /// Ensure that the term structure is applicable to the date.
-    fn validate_datetime(&self, dt: DateTime<Utc>) -> TermStructureDateTimeValidity;
+    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity;
 }
 
 #[allow(clippy::module_name_repetitions)]

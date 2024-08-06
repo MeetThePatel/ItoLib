@@ -1,15 +1,14 @@
 use crate::instruments::exercises::Exercise;
-
-use chrono::{DateTime, Utc};
+use crate::time::DateTime;
 
 #[derive(Debug, Copy, Clone)]
 pub struct AmericanExercise {
-    date: DateTime<Utc>,
+    date: DateTime,
 }
 
 impl AmericanExercise {
     #[must_use]
-    pub const fn new(date: DateTime<Utc>) -> Self {
+    pub const fn new(date: DateTime) -> Self {
         Self { date }
     }
 }
@@ -17,26 +16,27 @@ impl AmericanExercise {
 impl Exercise for AmericanExercise {
     #[inline]
     #[must_use]
-    fn get_dates(&self) -> Vec<DateTime<Utc>> {
+    fn get_dates(&self) -> Vec<DateTime> {
         vec![self.date]
     }
 
     #[inline]
     #[must_use]
-    fn get_last_date(&self) -> DateTime<Utc> {
+    fn get_last_date(&self) -> DateTime {
         self.date
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::instruments::exercises::{AmericanExercise, Exercise};
-
-    use chrono::Utc;
+    use crate::{
+        instruments::exercises::{AmericanExercise, Exercise},
+        time::DateTime,
+    };
 
     #[test]
     fn test_american_exercise() {
-        let now = Utc::now();
+        let now = DateTime::now();
         let x = AmericanExercise::new(now);
         assert_eq!(x.get_dates(), vec![now]);
         assert_eq!(x.get_last_date(), now);

@@ -52,7 +52,7 @@ where
         write!(
             f,
             "{} {} {}",
-            self.exercise.get_last_date().format("%y/%m/%d"),
+            self.exercise.get_last_date().format_ymd(),
             self.payoff.get_strike(),
             type_letter,
         )
@@ -65,8 +65,7 @@ mod tests {
     use crate::instruments::options::{AmericanOption, OptionType};
     use crate::instruments::payoffs::VanillaPayoff;
     use crate::money::{currency::USD, Money};
-
-    use chrono::{DateTime, NaiveDateTime, Utc};
+    use crate::time::DateTime;
 
     #[test]
     fn test_american_option_display() {
@@ -74,14 +73,11 @@ mod tests {
         let option_type = OptionType::CALL;
         let payoff = VanillaPayoff::new(strike_price, option_type);
 
-        let date: DateTime<Utc> = DateTime::from_naive_utc_and_offset(
-            NaiveDateTime::parse_from_str("24/07/27 00:00:00", "%y/%m/%d %H:%M:%S").unwrap(),
-            Utc,
-        );
+        let date: DateTime = DateTime::new_from_ymd(2024, 7, 27);
         let exercise = AmericanExercise::new(date);
 
         let option = AmericanOption::new(payoff, exercise);
 
-        assert_eq!(option.to_string(), "24/07/27 $ 30.00 C (A)");
+        assert_eq!(option.to_string(), "2024/07/27 $ 30.00 C (A)");
     }
 }
