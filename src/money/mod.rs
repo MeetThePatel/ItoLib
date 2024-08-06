@@ -7,7 +7,7 @@ pub use exchange_rate::ExchangeRate;
 mod exchange_rate_manager;
 pub use exchange_rate_manager::{ExchangeRateManager, ExchangeRateManagerError};
 
-use num::{traits::NumOps, Zero};
+use num::Zero;
 
 use std::{
     fmt::Display,

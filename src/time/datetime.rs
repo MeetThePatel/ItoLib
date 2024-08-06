@@ -9,14 +9,17 @@ use super::Duration;
 pub struct DateTime(Epoch);
 
 impl DateTime {
+    #[must_use]
     pub const fn new_from_epoch(dt: &Epoch) -> Self {
         Self(*dt)
     }
 
+    #[must_use]
     pub fn new_from_ymd(year: i32, month: u8, day: u8) -> Self {
         Self(Epoch::from_gregorian_utc_at_midnight(year, month, day))
     }
 
+    #[must_use]
     pub fn new_from_ymd_hms(
         year: i32,
         month: u8,
@@ -30,6 +33,7 @@ impl DateTime {
         ))
     }
 
+    #[must_use]
     pub fn now() -> Self {
         Self(Epoch::now().unwrap())
     }
@@ -38,6 +42,7 @@ impl DateTime {
         Ok(Formatter::new(**self, format(s)?).to_string())
     }
 
+    #[must_use]
     pub fn format_ymd(&self) -> String {
         Formatter::new(**self, format_ymd()).to_string()
     }
@@ -47,6 +52,7 @@ pub fn format(s: &str) -> Result<Format, hifitime::ParsingErrors> {
     Format::from_str(s)
 }
 
+#[must_use]
 pub fn format_ymd() -> Format {
     Format::from_str("%y/%m/%d").unwrap()
 }
@@ -70,6 +76,7 @@ impl From<Epoch> for DateTime {
     }
 }
 impl From<DateTime> for i64 {
+    #[allow(clippy::cast_possible_truncation)]
     fn from(value: DateTime) -> Self {
         value.0.to_utc_seconds() as i64
     }
@@ -80,7 +87,7 @@ impl From<DateTime> for f64 {
     }
 }
 
-/// DateTime + Duration
+/// `DateTime` + `Duration`
 impl Add<Duration> for DateTime {
     type Output = DateTime;
 
@@ -88,7 +95,7 @@ impl Add<Duration> for DateTime {
         Self(self.0.add(*rhs))
     }
 }
-/// Duration + DateTime
+/// `Duration` + `DateTime`
 impl Add<DateTime> for Duration {
     type Output = DateTime;
 

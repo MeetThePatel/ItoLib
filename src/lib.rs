@@ -1,4 +1,5 @@
 #![warn(clippy::all)]
+#![allow(clippy::module_name_repetitions)]
 
 pub mod instruments;
 pub mod money;

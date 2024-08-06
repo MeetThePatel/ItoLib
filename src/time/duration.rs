@@ -7,22 +7,28 @@ use hifitime::{Duration as hifidur, Unit};
 pub struct Duration(hifidur);
 
 impl Duration {
+    #[must_use]
     pub const fn new_from_duration(dur: &hifidur) -> Self {
         Self(*dur)
     }
 
+    #[must_use]
     pub fn new_from_millis(millis: f64) -> Self {
         Self(hifidur::from_f64(millis, Millisecond))
     }
+    #[must_use]
     pub fn new_from_seconds(seconds: f64) -> Self {
         Self(hifidur::from_f64(seconds, Second))
     }
+    #[must_use]
     pub fn new_from_minutes(minutes: f64) -> Self {
         Self(hifidur::from_f64(minutes, Minute))
     }
+    #[must_use]
     pub fn new_from_hours(hours: f64) -> Self {
         Self(hifidur::from_f64(hours, Hour))
     }
+    #[must_use]
     pub fn new_from_days(days: f64) -> Self {
         Self(hifidur::from_f64(days, Day))
     }

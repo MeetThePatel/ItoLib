@@ -1,26 +1,27 @@
-use chrono::{DateTime, Utc};
 use day_count_conventions::DayCounter;
 
 use crate::{
     term_structures::{
         term_structure::TermStructureStrikeValidity, TermStructure, TermStructureDateTimeValidity,
     },
+    time::DateTime,
     types::{Strike, Volatility},
 };
 
 use super::VolailityTermStructure;
 
 pub struct BlackVolatilityCurve {
-    datetimes: Vec<DateTime<Utc>>,
+    datetimes: Vec<DateTime>,
     volatilities: Vec<Volatility>,
-    reference_date: DateTime<Utc>,
+    reference_date: DateTime,
 }
 
 impl BlackVolatilityCurve {
+    #[must_use]
     pub fn new(
-        datetimes: &[DateTime<Utc>],
+        datetimes: &[DateTime],
         volatilities: &[Volatility],
-        reference_date: DateTime<Utc>,
+        reference_date: DateTime,
     ) -> Self {
         Self {
             datetimes: datetimes.to_vec(),
@@ -28,11 +29,9 @@ impl BlackVolatilityCurve {
             reference_date,
         }
     }
-    pub fn new_with_pairs(
-        pairs: &[(DateTime<Utc>, Volatility)],
-        reference_date: DateTime<Utc>,
-    ) -> Self {
-        let (datetimes, volatilities) = pairs.iter().cloned().unzip();
+    #[must_use]
+    pub fn new_with_pairs(pairs: &[(DateTime, Volatility)], reference_date: DateTime) -> Self {
+        let (datetimes, volatilities) = pairs.iter().copied().unzip();
         Self {
             datetimes,
             volatilities,
@@ -45,15 +44,15 @@ impl<D> TermStructure<D> for BlackVolatilityCurve
 where
     D: DayCounter,
 {
-    fn get_reference_date(&self) -> DateTime<Utc> {
+    fn get_reference_date(&self) -> DateTime {
         self.reference_date
     }
 
-    fn get_max_datetime(&self) -> DateTime<Utc> {
+    fn get_max_datetime(&self) -> DateTime {
         self.datetimes.last().copied().unwrap()
     }
 
-    fn validate_datetime(&self, dt: DateTime<Utc>) -> TermStructureDateTimeValidity {
+    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
         if dt >= <BlackVolatilityCurve as TermStructure<D>>::get_reference_date(self)
             && dt <= <BlackVolatilityCurve as TermStructure<D>>::get_max_datetime(self)
         {
