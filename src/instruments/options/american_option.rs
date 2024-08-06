@@ -61,6 +61,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::instruments::exercises::AmericanExercise;
     use crate::instruments::options::{AmericanOption, OptionType};
     use crate::instruments::payoffs::VanillaPayoff;
@@ -70,14 +71,21 @@ mod tests {
     #[test]
     fn test_american_option_display() {
         let strike_price: Money<USD> = Money::new(30.00);
-        let option_type = OptionType::CALL;
-        let payoff = VanillaPayoff::new(strike_price, option_type);
+        let call_payoff = VanillaPayoff::new(strike_price, OptionType::CALL);
+        let put_payoff = VanillaPayoff::new(strike_price, OptionType::PUT);
 
         let date: DateTime = DateTime::new_from_ymd(2024, 7, 27);
         let exercise = AmericanExercise::new(date);
 
-        let option = AmericanOption::new(payoff, exercise);
+        let call = AmericanOption::new(call_payoff, exercise);
+        let put = AmericanOption::new(put_payoff, exercise);
 
-        assert_eq!(option.to_string(), "2024/07/27 $ 30.00 C (A)");
+        assert_eq!(call.to_string(), "2024/07/27 $ 30.00 C (A)");
+        assert_eq!(put.to_string(), "2024/07/27 $ 30.00 P (A)");
+        assert_eq!(call.get_payoff().to_string(), "$ 30.00 CALL");
+        assert_eq!(
+            call.get_exercise().get_dates(),
+            &[DateTime::new_from_ymd(2024, 7, 27)]
+        );
     }
 }

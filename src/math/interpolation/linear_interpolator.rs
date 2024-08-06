@@ -154,6 +154,17 @@ mod tests {
     }
 
     #[test]
+    fn test_existing_point() {
+        let xs = [1.0, 2.0];
+        let ys = [10.0, 20.0];
+
+        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let result = interpolator.interpolate(1.0).unwrap();
+
+        assert_approx_equal_f64!(result, 10.0);
+    }
+
+    #[test]
     fn test_interpolate_money() {
         let xs = [1.0, 2.0];
         let ys = vec![Money::new(10.0), Money::new(20.0)];
@@ -176,11 +187,18 @@ mod tests {
 
     #[test]
     fn test_interpolate_no_points() {
-        let interpolator = LinearInterpolator::<f64, Money<USD>>::new(&[], &[])
+        let result = LinearInterpolator::<f64, Money<USD>>::new(&[], &[])
             .unwrap()
             .range()
             .unwrap_err();
 
-        assert_eq!(interpolator, InterpolationError::NoPoints);
+        assert_eq!(result, InterpolationError::NoPoints);
+    }
+
+    #[test]
+    fn test_uneven_points() {
+        let result = LinearInterpolator::<f64, f64>::new(&[1.0, 2.0], &[1.0]).unwrap_err();
+
+        assert_eq!(result, InterpolationError::UnequalLength);
     }
 }
