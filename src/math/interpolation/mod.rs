@@ -20,6 +20,7 @@ where
 }
 
 #[non_exhaustive]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum InterpolationError {
     UnequalLength,
     NoPoints,

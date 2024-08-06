@@ -5,6 +5,7 @@ use crate::math::{
 
 use super::Interpolator;
 
+#[derive(Debug)]
 pub struct LinearInterpolator<IndexType, ValueType>
 where
     IndexType: InterpolationIndex,
@@ -97,10 +98,89 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum LinearInterpolatorStatus {
     Unfitted = 0,
     Fitted = 1,
 }
 
-// TODO: Write tests.
+#[cfg(test)]
+mod tests {
+    use crate::{
+        math::interpolation::*,
+        money::{currency::USD, Money},
+    };
+
+    #[test]
+    fn test_new_interpolator() {
+        let xs = [1.0, 3.0, 2.0];
+        let ys = [10.0, 30.0, 20.0];
+
+        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+
+        assert_eq!(interpolator.xs, vec![1.0, 2.0, 3.0]);
+        assert_eq!(interpolator.ys, vec![10.0, 20.0, 30.0]);
+        assert_eq!(interpolator.status, LinearInterpolatorStatus::Unfitted);
+    }
+
+    #[test]
+    fn test_fit() {
+        let xs = [1.0, 2.0];
+        let ys = [10.0, 20.0];
+
+        let mut interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        interpolator.fit().unwrap();
+
+        assert_eq!(interpolator.status, LinearInterpolatorStatus::Fitted);
+    }
+
+    #[test]
+    fn test_add_point() {
+        let mut interpolator = LinearInterpolator::new(&[1.0], &[10.0]).unwrap();
+
+        interpolator.add_point((2.0, 20.0));
+        assert_eq!(interpolator.xs, vec![1.0, 2.0]);
+        assert_eq!(interpolator.ys, vec![10.0, 20.0]);
+    }
+    #[test]
+    fn test_interpolate_f64() {
+        let xs = [1.0, 2.0];
+        let ys = [10.0, 20.0];
+
+        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let result = interpolator.interpolate(1.5).unwrap();
+
+        assert_approx_equal_f64!(result, 15.0);
+    }
+
+    #[test]
+    fn test_interpolate_money() {
+        let xs = [1.0, 2.0];
+        let ys = vec![Money::new(10.0), Money::new(20.0)];
+
+        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let result = interpolator.interpolate(1.5).unwrap();
+
+        assert_approx_equal_Money!(result, Money::<USD>::new(15.0));
+    }
+    #[test]
+    fn test_interpolate_out_of_range() {
+        let xs = [1.0, 2.0];
+        let ys = [10.0, 20.0];
+
+        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let result = interpolator.interpolate(3.0);
+
+        assert_eq!(result, Err(InterpolationError::OutOfRange));
+    }
+
+    #[test]
+    fn test_interpolate_no_points() {
+        let interpolator = LinearInterpolator::<f64, Money<USD>>::new(&[], &[])
+            .unwrap()
+            .range()
+            .unwrap_err();
+
+        assert_eq!(interpolator, InterpolationError::NoPoints);
+    }
+}
