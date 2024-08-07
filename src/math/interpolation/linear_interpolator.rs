@@ -1,11 +1,9 @@
 use crate::math::{
-    interpolation::{InterpolationError, InterpolationIndex},
+    interpolation::{InterpolationError, InterpolationIndex, Interpolator, InterpolatorStatus},
     FloatScalable,
 };
 
-use super::Interpolator;
-
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct LinearInterpolator<IndexType, ValueType>
 where
     IndexType: InterpolationIndex,
@@ -13,7 +11,7 @@ where
 {
     pub xs: Vec<IndexType>,
     pub ys: Vec<ValueType>,
-    pub status: LinearInterpolatorStatus,
+    pub status: InterpolatorStatus,
 }
 
 impl<IndexType, ValueType> LinearInterpolator<IndexType, ValueType>
@@ -21,7 +19,15 @@ where
     IndexType: InterpolationIndex,
     ValueType: FloatScalable,
 {
-    pub fn new(xs: &[IndexType], ys: &[ValueType]) -> Result<Self, InterpolationError> {
+    pub fn new() -> Self {
+        Self {
+            xs: Vec::new(),
+            ys: Vec::new(),
+            status: InterpolatorStatus::Unfitted,
+        }
+    }
+
+    pub fn new_with_pairs(xs: &[IndexType], ys: &[ValueType]) -> Result<Self, InterpolationError> {
         if xs.len() != ys.len() {
             return Err(InterpolationError::UnequalLength);
         }
@@ -36,7 +42,7 @@ where
         Ok(Self {
             xs,
             ys,
-            status: LinearInterpolatorStatus::Unfitted,
+            status: InterpolatorStatus::Unfitted,
         })
     }
 }
@@ -47,9 +53,35 @@ where
     IndexType: InterpolationIndex,
     ValueType: FloatScalable,
 {
+    fn new() -> Self {
+        Self {
+            xs: Vec::new(),
+            ys: Vec::new(),
+            status: InterpolatorStatus::Unfitted,
+        }
+    }
+
+    fn set_xs(&mut self, xs: &[IndexType]) {
+        self.xs = xs.to_vec();
+    }
+
+    fn set_ys(&mut self, ys: &[ValueType]) {
+        self.ys = ys.to_vec();
+    }
+
+    fn add_point(&mut self, point: (IndexType, ValueType)) {
+        let idx = self.xs.partition_point(|&x| x < point.0);
+        self.xs.insert(idx, point.0);
+        self.ys.insert(idx, point.1);
+    }
+
     fn fit(&mut self) -> Result<(), InterpolationError> {
-        self.status = LinearInterpolatorStatus::Fitted;
+        self.status = InterpolatorStatus::Fitted;
         Ok(())
+    }
+
+    fn get_status(&self) -> InterpolatorStatus {
+        self.status
     }
 
     fn range(&self) -> Result<(IndexType, IndexType), InterpolationError> {
@@ -59,12 +91,6 @@ where
             // Safe to unwrap, because Vec::first and Vec::last only return None if the vec is empty
             Ok((*self.xs.first().unwrap(), *self.xs.last().unwrap()))
         }
-    }
-
-    fn add_point(&mut self, point: (IndexType, ValueType)) {
-        let idx = self.xs.partition_point(|&x| x < point.0);
-        self.xs.insert(idx, point.0);
-        self.ys.insert(idx, point.1);
     }
 
     fn interpolate(&self, point: IndexType) -> Result<ValueType, InterpolationError> {
@@ -98,12 +124,6 @@ where
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum LinearInterpolatorStatus {
-    Unfitted = 0,
-    Fitted = 1,
-}
-
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -116,11 +136,11 @@ mod tests {
         let xs = [1.0, 3.0, 2.0];
         let ys = [10.0, 30.0, 20.0];
 
-        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
 
         assert_eq!(interpolator.xs, vec![1.0, 2.0, 3.0]);
         assert_eq!(interpolator.ys, vec![10.0, 20.0, 30.0]);
-        assert_eq!(interpolator.status, LinearInterpolatorStatus::Unfitted);
+        assert_eq!(interpolator.status, InterpolatorStatus::Unfitted);
     }
 
     #[test]
@@ -128,15 +148,15 @@ mod tests {
         let xs = [1.0, 2.0];
         let ys = [10.0, 20.0];
 
-        let mut interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let mut interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
         interpolator.fit().unwrap();
 
-        assert_eq!(interpolator.status, LinearInterpolatorStatus::Fitted);
+        assert_eq!(interpolator.status, InterpolatorStatus::Fitted);
     }
 
     #[test]
     fn test_add_point() {
-        let mut interpolator = LinearInterpolator::new(&[1.0], &[10.0]).unwrap();
+        let mut interpolator = LinearInterpolator::new_with_pairs(&[1.0], &[10.0]).unwrap();
 
         interpolator.add_point((2.0, 20.0));
         assert_eq!(interpolator.xs, vec![1.0, 2.0]);
@@ -147,7 +167,7 @@ mod tests {
         let xs = [1.0, 2.0];
         let ys = [10.0, 20.0];
 
-        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
         let result = interpolator.interpolate(1.5).unwrap();
 
         assert_approx_equal_f64!(result, 15.0);
@@ -158,7 +178,7 @@ mod tests {
         let xs = [1.0, 2.0];
         let ys = [10.0, 20.0];
 
-        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
         let result = interpolator.interpolate(1.0).unwrap();
 
         assert_approx_equal_f64!(result, 10.0);
@@ -169,7 +189,7 @@ mod tests {
         let xs = [1.0, 2.0];
         let ys = vec![Money::new(10.0), Money::new(20.0)];
 
-        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
         let result = interpolator.interpolate(1.5).unwrap();
 
         assert_approx_equal_Money!(result, Money::<USD>::new(15.0));
@@ -179,7 +199,7 @@ mod tests {
         let xs = [1.0, 2.0];
         let ys = [10.0, 20.0];
 
-        let interpolator = LinearInterpolator::new(&xs, &ys).unwrap();
+        let interpolator = LinearInterpolator::new_with_pairs(&xs, &ys).unwrap();
         let result = interpolator.interpolate(3.0);
 
         assert_eq!(result, Err(InterpolationError::OutOfRange));
@@ -187,7 +207,7 @@ mod tests {
 
     #[test]
     fn test_interpolate_no_points() {
-        let result = LinearInterpolator::<f64, Money<USD>>::new(&[], &[])
+        let result = LinearInterpolator::<f64, Money<USD>>::new_with_pairs(&[], &[])
             .unwrap()
             .range()
             .unwrap_err();
@@ -197,7 +217,8 @@ mod tests {
 
     #[test]
     fn test_uneven_points() {
-        let result = LinearInterpolator::<f64, f64>::new(&[1.0, 2.0], &[1.0]).unwrap_err();
+        let result =
+            LinearInterpolator::<f64, f64>::new_with_pairs(&[1.0, 2.0], &[1.0]).unwrap_err();
 
         assert_eq!(result, InterpolationError::UnequalLength);
     }

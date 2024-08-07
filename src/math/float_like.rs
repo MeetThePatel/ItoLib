@@ -9,6 +9,7 @@ pub trait FloatScalable:
     + Div<f64, Output = Self>
     + Into<f64>
     + Debug
+    + Default
     + Copy
     + Clone
     + Sized
@@ -21,6 +22,7 @@ impl<T> FloatScalable for T where
         + Div<f64, Output = Self>
         + Into<f64>
         + Debug
+        + Default
         + Copy
         + Clone
         + Sized

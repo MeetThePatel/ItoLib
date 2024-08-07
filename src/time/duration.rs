@@ -124,10 +124,10 @@ impl Mul<Duration> for i64 {
 
 /// Duration / Duration
 impl Div<Self> for Duration {
-    type Output = Self;
+    type Output = f64;
 
     fn div(self, rhs: Self) -> Self::Output {
-        Self::new_from_millis(self.to_unit(Unit::Millisecond) / rhs.to_unit(Unit::Millisecond))
+        self.to_unit(Unit::Millisecond) / rhs.to_unit(Unit::Millisecond)
     }
 }
 
@@ -145,5 +145,57 @@ impl Div<i64> for Duration {
 
     fn div(self, rhs: i64) -> Self::Output {
         Self(self.0 / rhs)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use hifitime::Unit;
+
+    use crate::time::Duration;
+
+    #[test]
+    fn test_constructors() {
+        assert!(Duration::new_from_days(1.0) > Duration::new_from_hours(1.0));
+        assert_eq!(
+            Duration::new_from_duration(&hifitime::Duration::from_milliseconds(1.0)),
+            Duration::new_from_millis(1.0)
+        );
+        assert_ne!(
+            Duration::new_from_seconds(1.0),
+            Duration::new_from_minutes(1.0)
+        );
+    }
+
+    #[test]
+    fn test_deref() {
+        let dur = Duration::new_from_minutes(1.0);
+        assert_ne!((*dur).to_parts(), (1, 1));
+
+        let mut dur2 = Duration::new_from_minutes(2.0);
+        dur2 = Duration::new_from_minutes(1.0);
+        assert_eq!(dur, dur2);
+    }
+
+    #[test]
+    fn test_ops() {
+        let dur = Duration::new_from_minutes(1.0);
+
+        assert_eq!(dur - dur, Duration::new_from_minutes(0.0));
+
+        assert_eq!(dur + Unit::Minute, dur + dur);
+        assert_eq!(Unit::Minute + dur, dur + dur);
+        assert_eq!(dur - Unit::Minute, Duration::new_from_minutes(0.0));
+
+        assert_eq!(dur * 2.0, Duration::new_from_minutes(2.0));
+        assert_eq!(2.0 * dur, Duration::new_from_minutes(2.0));
+
+        assert_eq!(dur * 2, Duration::new_from_minutes(2.0));
+        assert_eq!(2 * dur, Duration::new_from_minutes(2.0));
+
+        assert_eq!(dur / 2.0, Duration::new_from_minutes(0.5));
+        assert_eq!(dur / 2, Duration::new_from_minutes(0.5));
+
+        assert_eq!(dur / Duration::new_from_millis(500.0), 120.0);
     }
 }

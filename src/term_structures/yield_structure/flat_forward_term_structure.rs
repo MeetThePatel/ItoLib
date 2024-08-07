@@ -149,11 +149,60 @@ mod tests {
         compounding::Compounding,
         interest_rate::InterestRate,
         money::currency::USD,
-        term_structures::yield_structure::{
-            flat_forward_term_structure::FlatForwardTermStructure, YieldTermStructure,
+        term_structures::{
+            yield_structure::{
+                flat_forward_term_structure::FlatForwardTermStructure, YieldTermStructure,
+            },
+            TermStructure, TermStructureDateTimeValidity, TermStructureError,
         },
         time::DateTime,
     };
+
+    #[test]
+    fn test_flat_forward_term_structure_errors() {
+        let dcc = Actual365Fixed;
+        let comp = Compounding::Continuous;
+        let flat_rate: InterestRate<USD, _> = InterestRate::new(0.045, dcc, comp);
+
+        let ref_date = DateTime::new_from_ymd(2024, 1, 1);
+
+        let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
+
+        assert_eq!(
+            term_structure.validate_datetime(DateTime::new_from_ymd(2000, 1, 1)),
+            TermStructureDateTimeValidity::Invalid
+        );
+        assert_eq!(
+            term_structure
+                .discount_factor(DateTime::new_from_ymd(2000, 1, 1))
+                .unwrap_err(),
+            TermStructureError::InvalidDateTime
+        );
+        assert_eq!(
+            term_structure
+                .zero_rate(DateTime::new_from_ymd(2000, 1, 1))
+                .unwrap_err(),
+            TermStructureError::InvalidDateTime
+        );
+        assert_eq!(
+            term_structure
+                .forward_rate(DateTime::new_from_ymd(2000, 1, 1), ref_date)
+                .unwrap_err(),
+            TermStructureError::InvalidDateTime
+        );
+        assert_eq!(
+            term_structure
+                .forward_rate(ref_date, DateTime::new_from_ymd(2000, 1, 1))
+                .unwrap_err(),
+            TermStructureError::InvalidDateTime
+        );
+        assert_eq!(
+            term_structure
+                .forward_rate(DateTime::new_from_ymd(2024, 12, 1), ref_date)
+                .unwrap_err(),
+            TermStructureError::T2LessThanT1
+        );
+    }
 
     #[test]
     fn test_flat_forward_term_structure_discount_factor() {

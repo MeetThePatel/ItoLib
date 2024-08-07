@@ -80,6 +80,18 @@ where
     }
 }
 
+impl<C> Default for Money<C>
+where
+    C: Currency,
+{
+    fn default() -> Self {
+        Self {
+            amount: 0.0,
+            currency: PhantomData,
+        }
+    }
+}
+
 impl<C> Display for Money<C>
 where
     C: Currency + Default,

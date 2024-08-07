@@ -10,13 +10,30 @@ where
     IndexType: InterpolationIndex,
     ValueType: FloatScalable,
 {
-    fn fit(&mut self) -> Result<(), InterpolationError>;
+    fn new() -> Self
+    where
+        Self: Sized;
 
-    fn range(&self) -> Result<(IndexType, IndexType), InterpolationError>;
+    fn set_xs(&mut self, xs: &[IndexType]);
+
+    fn set_ys(&mut self, ys: &[ValueType]);
 
     fn add_point(&mut self, point: (IndexType, ValueType));
 
+    fn fit(&mut self) -> Result<(), InterpolationError>;
+
+    fn get_status(&self) -> InterpolatorStatus;
+
+    fn range(&self) -> Result<(IndexType, IndexType), InterpolationError>;
+
     fn interpolate(&self, point: IndexType) -> Result<ValueType, InterpolationError>;
+}
+
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
+pub enum InterpolatorStatus {
+    #[default]
+    Unfitted = 0,
+    Fitted = 1,
 }
 
 #[non_exhaustive]
@@ -28,4 +45,4 @@ pub enum InterpolationError {
 }
 
 mod linear_interpolator;
-pub use linear_interpolator::{LinearInterpolator, LinearInterpolatorStatus};
+pub use linear_interpolator::LinearInterpolator;

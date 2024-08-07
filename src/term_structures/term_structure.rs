@@ -21,7 +21,7 @@ where
 
 #[allow(clippy::module_name_repetitions)]
 #[non_exhaustive]
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TermStructureError {
     InvalidDateTime,
     T2LessThanT1,
