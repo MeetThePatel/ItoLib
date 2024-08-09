@@ -2,6 +2,7 @@ use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
 
 pub use hifitime::Unit::*;
 use hifitime::{Duration as hifidur, Unit};
+use ordered_float::OrderedFloat;
 
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct Duration(hifidur);
@@ -89,12 +90,15 @@ impl Sub<Unit> for Duration {
     }
 }
 
-/// Duration * f64
-impl Mul<f64> for Duration {
+/// Duration * Into<f64>
+impl<T> Mul<T> for Duration
+where
+    T: Into<f64>,
+{
     type Output = Self;
 
-    fn mul(self, rhs: f64) -> Self::Output {
-        Self(self.0 * rhs)
+    fn mul(self, rhs: T) -> Self::Output {
+        Self(self.0 * rhs.into())
     }
 }
 /// f64 * Duration
@@ -105,20 +109,20 @@ impl Mul<Duration> for f64 {
         Duration(rhs.0 * self)
     }
 }
-/// Duration * i64
-impl Mul<i64> for Duration {
-    type Output = Self;
-
-    fn mul(self, rhs: i64) -> Self::Output {
-        Self(self.0 * rhs)
-    }
-}
 /// i64 * Duration
 impl Mul<Duration> for i64 {
     type Output = Duration;
 
     fn mul(self, rhs: Duration) -> Self::Output {
         Duration(rhs.0 * self)
+    }
+}
+/// OrderedFloat * Duration
+impl Mul<Duration> for OrderedFloat<f64> {
+    type Output = Duration;
+
+    fn mul(self, rhs: Duration) -> Self::Output {
+        Duration(rhs.0 * *self)
     }
 }
 
@@ -173,6 +177,8 @@ mod tests {
         assert_ne!((*dur).to_parts(), (1, 1));
 
         let mut dur2 = Duration::new_from_minutes(2.0);
+        *dur2 = *Duration::new_from_minutes(3.0);
+
         dur2 = Duration::new_from_minutes(1.0);
         assert_eq!(dur, dur2);
     }

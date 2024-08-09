@@ -2,6 +2,7 @@ use std::ops::{Add, Deref, DerefMut};
 use std::str::FromStr;
 
 use hifitime::prelude::*;
+use ordered_float::OrderedFloat;
 
 use super::Duration;
 
@@ -84,6 +85,11 @@ impl From<DateTime> for i64 {
 impl From<DateTime> for f64 {
     fn from(value: DateTime) -> Self {
         value.0.to_utc_seconds()
+    }
+}
+impl From<DateTime> for OrderedFloat<f64> {
+    fn from(value: DateTime) -> Self {
+        OrderedFloat(value.0.to_utc_seconds())
     }
 }
 

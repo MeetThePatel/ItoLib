@@ -33,3 +33,29 @@ impl Display for Frequency {
         write!(f, "{output}")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display_frequency() {
+        let test_cases = [
+            (Frequency::Once, "Once"),
+            (Frequency::Annual, "Annual"),
+            (Frequency::Semiannual, "SemiAnnual"),
+            (Frequency::EveryFourthMonth, "EveryFourthMonth"),
+            (Frequency::Quarterly, "Quarterly"),
+            (Frequency::Bimonthly, "Bimonthly"),
+            (Frequency::Monthly, "Monthly"),
+            (Frequency::EveryFourthWeek, "EveryFourthWeek"),
+            (Frequency::Biweekly, "Biweekly"),
+            (Frequency::Weekly, "Weekly"),
+            (Frequency::Daily, "Daily"),
+        ];
+
+        for (freq, expected_output) in test_cases {
+            assert_eq!(format!("{}", freq), expected_output);
+        }
+    }
+}

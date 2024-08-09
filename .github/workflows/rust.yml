@@ -33,7 +33,7 @@ jobs:
       run: cargo clippy --verbose
 
     - name: Run tests
-      run: cargo nextest --verbose
+      run: cargo nextest --verbose run
 
   coverage:
     runs-on: ubuntu-latest

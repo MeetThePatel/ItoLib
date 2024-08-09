@@ -160,8 +160,6 @@ impl<'a> Display for ExchangeRateManager<'a> {
 
 #[cfg(test)]
 mod tests {
-    use ordered_float::OrderedFloat;
-
     use crate::assert_approx_equal_f64;
     use crate::macros::assert_approx_equal_Money;
     use crate::money::{

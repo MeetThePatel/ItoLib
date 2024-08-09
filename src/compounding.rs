@@ -19,3 +19,24 @@ impl Display for Compounding {
         write!(f, "{output}")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_display_compounding() {
+        let test_cases = [
+            (Compounding::Simple(Frequency::Annual), "Simple(Annual)"),
+            (
+                Compounding::Compounding(Frequency::Quarterly),
+                "Compounding(Quarterly)",
+            ),
+            (Compounding::Continuous, "Continuous"),
+        ];
+
+        for (compounding, expected_output) in test_cases {
+            assert_eq!(format!("{}", compounding), expected_output);
+        }
+    }
+}

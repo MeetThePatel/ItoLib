@@ -135,7 +135,6 @@ where
 #[cfg(test)]
 mod tests {
     use day_count_conventions::Actual365Fixed;
-    use ordered_float::OrderedFloat;
 
     use crate::{
         compounding::Compounding,
