@@ -24,7 +24,7 @@ jobs:
       uses: baptiste0928/cargo-install@v1
       with:
         crate: cargo-nextest
-        locked: true
+        args: --locked
 
     - name: Build
       run: cargo build --verbose
@@ -47,6 +47,12 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: llvm-tools-preview
+
+      - name: Install cargo-nextest
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-nextest
+          args: --locked
 
       - name: cargo install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
