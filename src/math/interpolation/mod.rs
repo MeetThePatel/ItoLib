@@ -2,47 +2,58 @@ use crate::math::FloatScalable;
 use std::fmt::Debug;
 
 /// Trait describing interpolation index requirements.
-pub trait InterpolationIndex: Into<f64> + PartialOrd + Debug + Copy + Clone + Sized {}
-impl<T> InterpolationIndex for T where T: Into<f64> + PartialOrd + Debug + Copy + Clone + Sized {}
+pub trait InterpolationIndex: Into<f64> + PartialOrd + Debug + Copy + Clone {}
+impl<T> InterpolationIndex for T where T: Into<f64> + PartialOrd + Debug + Copy + Clone {}
 
-pub trait Interpolator<IndexType, ValueType>
+pub trait Interpolator<I, V>
 where
-    IndexType: InterpolationIndex,
-    ValueType: FloatScalable,
+    I: InterpolationIndex,
+    V: FloatScalable,
 {
-    fn new() -> Self
-    where
-        Self: Sized;
+    /// Add a point to the interpolator.
+    fn add_point(&mut self, point: (I, V)) -> Result<(), InterpolationError<I, V>>;
 
-    fn set_xs(&mut self, xs: &[IndexType]);
+    /// Add points to the interpolator.
+    fn add_points(&mut self, points: &[(I, V)]);
 
-    fn set_ys(&mut self, ys: &[ValueType]);
+    /// Remove a point from the interpolator.
+    fn remove_point(&mut self, point: I) -> Option<V>;
 
-    fn add_point(&mut self, point: (IndexType, ValueType));
+    /// Remove points from the interpolator.
+    fn remove_points(&mut self, points: &[I]) -> &[Option<V>];
 
-    fn fit(&mut self) -> Result<(), InterpolationError>;
-
-    fn get_status(&self) -> InterpolatorStatus;
-
-    fn range(&self) -> Result<(IndexType, IndexType), InterpolationError>;
-
-    fn interpolate(&self, point: IndexType) -> Result<ValueType, InterpolationError>;
+    /// Interpolate at a point..
+    fn interpolate(&self, point: I) -> InterpolationResult<V>;
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Default)]
-pub enum InterpolatorStatus {
-    #[default]
-    Unfitted = 0,
-    Fitted = 1,
-}
-
-#[non_exhaustive]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub enum InterpolationError {
-    UnequalLength,
-    NoPoints,
+pub enum InterpolationResult<V>
+where
+    V: FloatScalable,
+{
+    ExistingValue(V),
+    InterpolatedValue(V),
     OutOfRange,
 }
 
-mod linear_interpolator;
-pub use linear_interpolator::LinearInterpolator;
+#[non_exhaustive]
+#[derive(Error, Debug, Copy, Clone, PartialEq, Eq)]
+pub enum InterpolationError<I, V>
+where
+    I: InterpolationIndex,
+    V: FloatScalable,
+{
+    #[error("Out of range.")]
+    OutOfRange,
+    #[error("A point already exists at x={0}: ({0}, {1})")]
+    AlreadyExists(I, V),
+}
+// impl From<UninitializedFieldError> for InterpolationError {
+//     fn from(_ufe: UninitializedFieldError) -> Self {
+//         Self::NoPoints
+//     }
+// }
+
+// mod linear_interpolator;
+// pub use linear_interpolator::LinearInterpolator;
+use thiserror::Error;

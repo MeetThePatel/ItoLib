@@ -5,9 +5,9 @@ use crate::{
     types::{Strike, Volatility},
 };
 
-use super::TermStructure;
+use super::VolatilityTermStructure;
 
-pub trait BlackVolatilityTermStructure<D>: TermStructure<D>
+pub trait BlackVolatilityTermStructure<D>: VolatilityTermStructure<D>
 where
     D: DayCounter,
 {

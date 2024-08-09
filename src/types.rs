@@ -1,23 +1,23 @@
 #[cfg(feature = "high_precision")]
 pub type MonetaryNumber = rust_decimal::Decimal;
-pub type MonetaryNumber = f64;
+pub type MonetaryNumber = ordered_float::OrderedFloat<f64>;
 
 #[cfg(feature = "high_precision")]
 pub type Percentage = rust_decimal::Decimal;
-pub type Percentage = f64;
+pub type Percentage = ordered_float::OrderedFloat<f64>;
 
 #[cfg(feature = "high_precision")]
 pub type DiscountFactor = rust_decimal::Decimal;
-pub type DiscountFactor = f64;
+pub type DiscountFactor = ordered_float::OrderedFloat<f64>;
 
 #[cfg(feature = "high_precision")]
 pub type CompoundFactor = rust_decimal::Decimal;
-pub type CompoundFactor = f64;
+pub type CompoundFactor = ordered_float::OrderedFloat<f64>;
 
 #[cfg(feature = "high_precision")]
 pub type Volatility = rust_decimal::Decimal;
-pub type Volatility = f64;
+pub type Volatility = ordered_float::OrderedFloat<f64>;
 
 #[cfg(feature = "high_precision")]
 pub type Strike = rust_decimal::Decimal;
-pub type Strike = f64;
+pub type Strike = ordered_float::OrderedFloat<f64>;

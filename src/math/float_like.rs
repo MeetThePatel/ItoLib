@@ -12,7 +12,6 @@ pub trait FloatScalable:
     + Default
     + Copy
     + Clone
-    + Sized
 {
 }
 
@@ -25,6 +24,5 @@ impl<T> FloatScalable for T where
         + Default
         + Copy
         + Clone
-        + Sized
 {
 }

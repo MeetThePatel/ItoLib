@@ -7,7 +7,8 @@ pub use exchange_rate::ExchangeRate;
 mod exchange_rate_manager;
 pub use exchange_rate_manager::{ExchangeRateManager, ExchangeRateManagerError};
 
-use num::Zero;
+use num::{traits::real::Real, Zero};
+use ordered_float::OrderedFloat;
 
 use std::{
     fmt::Display,
@@ -31,9 +32,9 @@ where
     C: Currency,
 {
     #[must_use]
-    pub const fn new(amount: MonetaryNumber) -> Self {
+    pub fn new(amount: impl Into<MonetaryNumber>) -> Self {
         Self {
-            amount,
+            amount: amount.into(),
             currency: PhantomData,
         }
     }
@@ -86,7 +87,7 @@ where
 {
     fn default() -> Self {
         Self {
-            amount: 0.0,
+            amount: OrderedFloat(0.0),
             currency: PhantomData,
         }
     }
@@ -194,7 +195,7 @@ where
     }
 
     fn is_zero(&self) -> bool {
-        (self.amount - MonetaryNumber::zero()).abs() < MonetaryNumber::EPSILON
+        (self.amount - MonetaryNumber::zero()).abs() < MonetaryNumber::epsilon()
     }
 }
 
@@ -224,7 +225,7 @@ mod tests {
             let m2 = Money::new(6.3);
 
             let expected = Money::new(11.3);
-            assert_approx_equal_Money!(m1 + m2, expected);
+            assert_approx_equal_Money!(m1 + m2, expected, 10e-8);
         }
 
         #[test]
@@ -233,7 +234,7 @@ mod tests {
             let m2 = Money::new(6.3);
 
             let expected = Money::new(6.64);
-            assert_approx_equal_Money!(m1 - m2, expected);
+            assert_approx_equal_Money!(m1 - m2, expected, 10e-8);
         }
 
         #[test]
@@ -241,7 +242,7 @@ mod tests {
             let m: Money<USD> = Money::new(5.0);
 
             let expected = Money::new(20.0);
-            assert_approx_equal_Money!(m * 4.0, expected);
+            assert_approx_equal_Money!(m * 4.0, expected, 10e-8);
         }
 
         #[test]
@@ -249,7 +250,7 @@ mod tests {
             let m: Money<USD> = Money::new(5.0);
 
             let expected = Money::new(7.5);
-            assert_approx_equal_Money!(m * 1.5, expected);
+            assert_approx_equal_Money!(m * 1.5, expected, 10e-8);
         }
 
         #[test]
@@ -258,7 +259,7 @@ mod tests {
             let m2: Money<USD> = Money::new(6.0);
 
             let expected: Money<USD> = Money::new(1.0);
-            assert_approx_equal_Money!(m1 / m2, expected);
+            assert_approx_equal_Money!(m1 / m2, expected, 10e-8);
         }
 
         #[test]
@@ -266,7 +267,7 @@ mod tests {
             let m: Money<USD> = Money::new(6.0);
 
             let expected = Money::new(2.0);
-            assert_approx_equal_Money!(m / 3.0, expected);
+            assert_approx_equal_Money!(m / 3.0, expected, 10e-8);
         }
     }
     #[test]

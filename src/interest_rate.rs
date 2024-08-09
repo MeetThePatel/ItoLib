@@ -5,6 +5,7 @@ use crate::money::Currency;
 use crate::types::{CompoundFactor, DiscountFactor, Percentage};
 
 use day_count_conventions::{DayCountFraction, DayCounter};
+use ordered_float::OrderedFloat;
 
 #[derive(Debug, Copy, Clone)]
 pub struct InterestRate<C, D>
@@ -24,9 +25,9 @@ where
     D: DayCounter,
 {
     #[must_use]
-    pub const fn new(rate: Percentage, day_counter: D, compounding: Compounding) -> Self {
+    pub fn new(rate: impl Into<Percentage>, day_counter: D, compounding: Compounding) -> Self {
         Self {
-            rate,
+            rate: rate.into(),
             day_counter,
             compounding,
             _marker: PhantomData,
@@ -60,7 +61,7 @@ where
     /// Discount factor implied by the rate at time $t$.
     #[must_use]
     pub fn discount_factor(&self, year_fraction: &DayCountFraction<D>) -> DiscountFactor {
-        1.0 / self.compound_factor(year_fraction)
+        OrderedFloat(1.0) / self.compound_factor(year_fraction)
     }
 
     /// Compound factor implied by the rate at time $t$.
@@ -72,12 +73,13 @@ where
     /// Continuous: $e^{rt}$
     #[must_use]
     pub fn compound_factor(&self, year_fraction: &DayCountFraction<D>) -> CompoundFactor {
-        match self.compounding {
+        OrderedFloat(match self.compounding {
             Compounding::Simple(_) => self.rate.mul_add(year_fraction.get_fraction(), 1.0),
-            Compounding::Compounding(freq) => (1.0 + self.rate / f64::from(freq as i32))
-                .powf(f64::from(freq as i32) * year_fraction.get_fraction()),
-            Compounding::Continuous => f64::exp(self.rate * year_fraction.get_fraction()),
-        }
+            Compounding::Compounding(freq) => (OrderedFloat(1.0)
+                + self.rate / f64::from(freq as i32))
+            .powf(f64::from(freq as i32) * year_fraction.get_fraction()),
+            Compounding::Continuous => (self.rate * year_fraction.get_fraction()).exp(),
+        })
     }
 }
 
@@ -115,16 +117,16 @@ where
             let f = f64::from(f as u32);
             let r = (compound_factor.powf(1.0 / (f * day_count_fraction.get_fraction())) - 1.0) * f;
             Some(InterestRate {
-                rate: r,
+                rate: OrderedFloat(r),
                 day_counter: day_count_convention,
                 compounding,
                 _marker: PhantomData,
             })
         }
         Compounding::Continuous => {
-            let r = f64::ln(compound_factor) / day_count_fraction.get_fraction();
+            let r = compound_factor.ln() / day_count_fraction.get_fraction();
             Some(InterestRate {
-                rate: r,
+                rate: OrderedFloat(r),
                 day_counter: day_count_convention,
                 compounding,
                 _marker: PhantomData,

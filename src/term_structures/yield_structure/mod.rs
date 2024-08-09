@@ -2,7 +2,7 @@ use day_count_conventions::DayCounter;
 
 use crate::interest_rate::InterestRate;
 use crate::money::Currency;
-use crate::term_structures::term_structure::{TermStructure, TermStructureError};
+use crate::term_structures::{TermStructure, TermStructureError};
 use crate::time::DateTime;
 use crate::types::DiscountFactor;
 

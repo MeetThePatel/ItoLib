@@ -19,9 +19,9 @@ where
     Q: Currency,
 {
     #[must_use]
-    pub const fn new(rate: MonetaryNumber) -> Self {
+    pub fn new(rate: impl Into<MonetaryNumber>) -> Self {
         Self {
-            rate,
+            rate: rate.into(),
             quote_currency: PhantomData,
             base_currency: PhantomData,
         }
@@ -81,7 +81,7 @@ mod tests {
         let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
         let expected = Money::new(9.227_475_731_738_826);
-        assert_approx_equal_Money!(rate.convert_to_base(&m1), expected);
+        assert_approx_equal_Money!(rate.convert_to_base(&m1), expected, 10e-8);
     }
 
     #[test]
@@ -90,7 +90,7 @@ mod tests {
         let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
         let expected = Money::new(10.8372);
-        assert_approx_equal_Money!(rate.convert_to_quote(&m1), expected);
+        assert_approx_equal_Money!(rate.convert_to_quote(&m1), expected, 10e-8);
     }
 
     #[test]

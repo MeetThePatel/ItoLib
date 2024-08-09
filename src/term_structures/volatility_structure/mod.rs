@@ -1,10 +1,9 @@
 use day_count_conventions::DayCounter;
 
+use crate::term_structures::{TermStructure, TermStructureStrikeValidity};
 use crate::types::Strike;
 
-use super::{term_structure::TermStructureStrikeValidity, TermStructure};
-
-pub trait VolailityTermStructure<D>: TermStructure<D>
+pub trait VolatilityTermStructure<D>: TermStructure<D>
 where
     D: DayCounter,
 {
@@ -16,7 +15,7 @@ where
 pub mod black_volatility_term_structure;
 pub use black_volatility_term_structure::BlackVolatilityTermStructure;
 
-pub mod black_constant_volatility_term_structure;
-pub use black_constant_volatility_term_structure::BlackConstantVolatilityTermStructure;
+pub mod constant_vol_term_structure;
+pub use constant_vol_term_structure::*;
 
 pub mod black_volatility_curve;

@@ -6,28 +6,19 @@ use crate::time::DateTime;
 use crate::types::DiscountFactor;
 
 use day_count_conventions::{DayCountFraction, DayCounter};
+use derive_builder::Builder;
+use ordered_float::OrderedFloat;
 
+#[derive(Builder)]
 pub struct FlatForwardTermStructure<C, D>
 where
     C: Currency,
     D: DayCounter,
 {
+    #[builder(default = "DateTime::now()")]
     pub reference_date: DateTime,
-    pub rate: InterestRate<C, D>,
-}
 
-impl<C, D> FlatForwardTermStructure<C, D>
-where
-    C: Currency,
-    D: DayCounter,
-{
-    #[must_use]
-    pub const fn new(reference_date: DateTime, rate: InterestRate<C, D>) -> Self {
-        Self {
-            reference_date,
-            rate,
-        }
-    }
+    pub rate: InterestRate<C, D>,
 }
 
 impl<C, D> TermStructure<D> for FlatForwardTermStructure<C, D>
@@ -88,7 +79,7 @@ where
         if day_count_fraction.get_fraction() == 0.0 {
             day_count_fraction = DayCountFraction::new(10e-8);
         }
-        let compound_factor = 1.0 / self.discount_factor(t).unwrap();
+        let compound_factor = OrderedFloat(1.0) / self.discount_factor(t).unwrap();
 
         let compounding = self.rate.get_compounding();
 
@@ -144,6 +135,7 @@ where
 #[cfg(test)]
 mod tests {
     use day_count_conventions::Actual365Fixed;
+    use ordered_float::OrderedFloat;
 
     use crate::{
         compounding::Compounding,
@@ -151,7 +143,7 @@ mod tests {
         money::currency::USD,
         term_structures::{
             yield_structure::{
-                flat_forward_term_structure::FlatForwardTermStructure, YieldTermStructure,
+                flat_forward_term_structure::FlatForwardTermStructureBuilder, YieldTermStructure,
             },
             TermStructure, TermStructureDateTimeValidity, TermStructureError,
         },
@@ -166,7 +158,11 @@ mod tests {
 
         let ref_date = DateTime::new_from_ymd(2024, 1, 1);
 
-        let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
+        let term_structure = FlatForwardTermStructureBuilder::default()
+            .reference_date(ref_date)
+            .rate(flat_rate)
+            .build()
+            .unwrap();
 
         assert_eq!(
             term_structure.validate_datetime(DateTime::new_from_ymd(2000, 1, 1)),
@@ -214,7 +210,11 @@ mod tests {
         let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
         let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
-        let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
+        let term_structure = FlatForwardTermStructureBuilder::default()
+            .reference_date(ref_date)
+            .rate(flat_rate)
+            .build()
+            .unwrap();
 
         // Test Discount Factor
         assert_approx_equal_f64!(
@@ -248,7 +248,11 @@ mod tests {
         let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
         let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
-        let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
+        let term_structure = FlatForwardTermStructureBuilder::default()
+            .reference_date(ref_date)
+            .rate(flat_rate)
+            .build()
+            .unwrap();
 
         // Test Zero Rate
         assert_approx_equal_f64!(
@@ -284,7 +288,11 @@ mod tests {
         let ref_date_plus_1_year = DateTime::new_from_ymd(2025, 1, 1);
         let ref_date_plus_1_year_7_month: DateTime = DateTime::new_from_ymd(2025, 8, 1);
 
-        let term_structure = FlatForwardTermStructure::new(ref_date, flat_rate);
+        let term_structure = FlatForwardTermStructureBuilder::default()
+            .reference_date(ref_date)
+            .rate(flat_rate)
+            .build()
+            .unwrap();
 
         // Test forward rate
         assert_approx_equal_f64!(

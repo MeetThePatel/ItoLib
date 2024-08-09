@@ -5,13 +5,20 @@ edition = "2021"
 
 [dependencies]
 day_count_conventions = { version = "0.1.5", features = ["hifitime"] }
+derive_builder = "0.20.0"
 hifitime = "3.9.0"
 num = "0.4.3"
+ordered-float = "4.2.2"
+permutation = "0.4.1"
 rust_decimal = { version = "1.35.0", optional = true }
 rust_decimal_macros = { version = "1.35.0", optional = true }
+thiserror = "1.0.63"
 
 [features]
 high_precision = ["dep:rust_decimal", "dep:rust_decimal_macros"]
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "katex_header.html", "--cfg", "docsrs"]
+
+[[example]]
+name = "black_scholes"
