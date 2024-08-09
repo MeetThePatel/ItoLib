@@ -117,5 +117,11 @@ mod tests {
             interpolator.interpolate(OrderedFloat(6.0)),
             InterpolationResult::OutOfRange
         );
+
+        let _ = interpolator.remove_points([OrderedFloat(4.0), OrderedFloat(1.0)].to_vec());
+        assert_eq!(
+            interpolator.interpolate(OrderedFloat(1.0)),
+            InterpolationResult::OutOfRange
+        );
     }
 }

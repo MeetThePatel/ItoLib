@@ -2,12 +2,12 @@
 macro_rules! assert_approx_equal_f64 {
     ($x:expr, $y:expr, $d:expr) => {
         assert!(
-            (ordered_float::OrderedFloat::<f64>::from($x)
-                - ordered_float::OrderedFloat::<f64>::from($y)
-                <= ordered_float::OrderedFloat::<f64>::from($d))
-                && (ordered_float::OrderedFloat::<f64>::from($y)
-                    - ordered_float::OrderedFloat::<f64>::from($x)
-                    <= ordered_float::OrderedFloat::<f64>::from($d)),
+            ((ordered_float::OrderedFloat::<f64>::from($x)
+                - ordered_float::OrderedFloat::<f64>::from($y))
+            .le(&ordered_float::OrderedFloat::<f64>::from($d)))
+                && ((ordered_float::OrderedFloat::<f64>::from($y)
+                    - ordered_float::OrderedFloat::<f64>::from($x))
+                .le(&ordered_float::OrderedFloat::<f64>::from($d))),
             "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
             $x,
             $y,
@@ -22,11 +22,11 @@ macro_rules! assert_approx_equal_f32 {
     ($x:expr, $y:expr, $d:expr) => {
         assert!(
             (ordered_float::OrderedFloat::<f32>::from($x)
-                - ordered_float::OrderedFloat::<f32>::from($y)
-                <= ordered_float::OrderedFloat::<f32>::from($d))
-                && (ordered_float::OrderedFloat::<f32>::from($y)
-                    - ordered_float::OrderedFloat::<f32>::from($x)
-                    <= ordered_float::OrderedFloat::<f32>::from($d)),
+                - ordered_float::OrderedFloat::<f32>::from($y))
+            .le(ordered_float::OrderedFloat::<f32>::from($d))
+                && ((ordered_float::OrderedFloat::<f32>::from($y)
+                    - ordered_float::OrderedFloat::<f32>::from($x))
+                .le(ordered_float::OrderedFloat::<f32>::from($d))),
             "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
             $x,
             $y,
@@ -40,10 +40,10 @@ pub use assert_approx_equal_f32;
 macro_rules! assert_approx_equal_Money {
     ($x:expr, $y:expr, $d:expr) => {
         assert!(
-            (ordered_float::OrderedFloat::<f64>::from(($x - $y).amount)
-                <= ordered_float::OrderedFloat::<f64>::from($d))
-                && (ordered_float::OrderedFloat::<f64>::from(($y - $x).amount)
-                    <= ordered_float::OrderedFloat::<f64>::from($d)),
+            ((ordered_float::OrderedFloat::<f64>::from(($x - $y).amount))
+                .le(&ordered_float::OrderedFloat::<f64>::from($d)))
+                && ((ordered_float::OrderedFloat::<f64>::from(($y - $x).amount))
+                    .le(&ordered_float::OrderedFloat::<f64>::from($d))),
             "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
             $x,
             $y,

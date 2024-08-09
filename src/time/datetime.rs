@@ -119,6 +119,7 @@ impl std::fmt::Display for DateTime {
 #[cfg(test)]
 mod test {
     use hifitime::Epoch;
+    use ordered_float::OrderedFloat;
 
     use crate::time::Duration;
 
@@ -156,11 +157,14 @@ mod test {
 
         let int_repr = i64::from(dt);
         assert_eq!(dt.to_utc_seconds() as i64, int_repr);
+
+        let ordered_float_repr = OrderedFloat::<f64>::from(dt);
+        assert_eq!(dt.to_utc_seconds(), *ordered_float_repr);
     }
 
     #[test]
     fn test_ops() {
-        let dt = DateTime::new_from_ymd(2024, 1, 1);
+        let mut dt = DateTime::new_from_ymd(2024, 1, 1);
 
         assert_eq!(
             dt + Duration::new_from_days(1.0),
@@ -171,5 +175,7 @@ mod test {
             Duration::new_from_days(1.0) + dt,
             DateTime::new_from_ymd(2024, 1, 2)
         );
+
+        *dt = *DateTime::now();
     }
 }

@@ -237,11 +237,17 @@ pub use unformatted::*;
 
 #[cfg(test)]
 mod tests {
-    use super::USD;
+    use super::*;
 
     #[test]
-    fn test() {
+    fn test_currency() {
         let x = USD::default();
-        println!("{x:#?}");
+
+        assert_eq!(x.get_name(), "United States Dollar");
+        assert_eq!(x.get_symbol(), "$");
+        assert_eq!(x.get_alphabetic_code(), "USD");
+        assert_eq!(x.get_numeric_code(), "840");
+        assert_eq!(x.get_minor(), 2);
+        assert_eq!(x.get_fractions(), 100);
     }
 }

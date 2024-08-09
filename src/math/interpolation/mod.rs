@@ -42,25 +42,6 @@ where
     OutOfRange,
 }
 
-#[non_exhaustive]
-#[derive(Error, Debug, Copy, Clone, PartialEq, Eq)]
-pub enum InterpolationError<I, V>
-where
-    I: InterpolationIndex,
-    V: FloatScalable,
-{
-    #[error("Out of range.")]
-    OutOfRange,
-    #[error("A point already exists at x={0}: ({0}, {1})")]
-    AlreadyExists(I, V),
-}
-// impl From<UninitializedFieldError> for InterpolationError {
-//     fn from(_ufe: UninitializedFieldError) -> Self {
-//         Self::NoPoints
-//     }
-// }
-
 mod linear_interpolator;
 pub use linear_interpolator::LinearInterpolator;
 use ordered_float::OrderedFloat;
-use thiserror::Error;

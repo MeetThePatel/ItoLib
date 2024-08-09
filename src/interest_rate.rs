@@ -42,8 +42,8 @@ where
 
     #[inline]
     #[must_use]
-    pub const fn get_day_counter(&self) -> &D {
-        &self.day_counter
+    pub const fn get_day_counter(&self) -> D {
+        self.day_counter
     }
 
     #[inline]
@@ -60,7 +60,7 @@ where
 {
     /// Discount factor implied by the rate at time $t$.
     #[must_use]
-    pub fn discount_factor(&self, year_fraction: &DayCountFraction<D>) -> DiscountFactor {
+    pub fn discount_factor(&self, year_fraction: DayCountFraction<D>) -> DiscountFactor {
         OrderedFloat(1.0) / self.compound_factor(year_fraction)
     }
 
@@ -72,7 +72,7 @@ where
     ///
     /// Continuous: $e^{rt}$
     #[must_use]
-    pub fn compound_factor(&self, year_fraction: &DayCountFraction<D>) -> CompoundFactor {
+    pub fn compound_factor(&self, year_fraction: DayCountFraction<D>) -> CompoundFactor {
         OrderedFloat(match self.compounding {
             Compounding::Simple(_) => self.rate.mul_add(year_fraction.get_fraction(), 1.0),
             Compounding::Compounding(freq) => (OrderedFloat(1.0)
@@ -94,8 +94,8 @@ where
 }
 
 pub fn implied_rate_from_compound_factor<C, D>(
-    compound_factor: CompoundFactor,
-    day_count_fraction: &DayCountFraction<D>,
+    compound_factor: impl Into<CompoundFactor>,
+    day_count_fraction: DayCountFraction<D>,
     day_count_convention: D,
     compounding: Compounding,
 ) -> Option<InterestRate<C, D>>
@@ -105,7 +105,7 @@ where
 {
     match compounding {
         Compounding::Simple(_) => {
-            let r = (compound_factor - 1.0) / day_count_fraction.get_fraction();
+            let r = (compound_factor.into() - 1.0) / day_count_fraction.get_fraction();
             Some(InterestRate {
                 rate: r,
                 day_counter: day_count_convention,
@@ -115,7 +115,11 @@ where
         }
         Compounding::Compounding(f) => {
             let f = f64::from(f as u32);
-            let r = (compound_factor.powf(1.0 / (f * day_count_fraction.get_fraction())) - 1.0) * f;
+            let r = (compound_factor
+                .into()
+                .powf(1.0 / (f * day_count_fraction.get_fraction()))
+                - 1.0)
+                * f;
             Some(InterestRate {
                 rate: OrderedFloat(r),
                 day_counter: day_count_convention,
@@ -124,7 +128,7 @@ where
             })
         }
         Compounding::Continuous => {
-            let r = compound_factor.ln() / day_count_fraction.get_fraction();
+            let r = compound_factor.into().ln() / day_count_fraction.get_fraction();
             Some(InterestRate {
                 rate: OrderedFloat(r),
                 day_counter: day_count_convention,
@@ -132,5 +136,94 @@ where
                 _marker: PhantomData,
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use day_count_conventions::Actual360;
+
+    use super::*;
+    use crate::{money::currency::USD, time::Frequency};
+
+    #[test]
+    fn test_interest_rates() {
+        let simple_rate: InterestRate<USD, Actual360> =
+            InterestRate::new(0.05, Actual360, Compounding::Simple(Frequency::Annual));
+        let compound_rate: InterestRate<USD, Actual360> = InterestRate::new(
+            0.05,
+            Actual360,
+            Compounding::Compounding(Frequency::Quarterly),
+        );
+        let continuous_rate: InterestRate<USD, Actual360> =
+            InterestRate::new(0.05, Actual360, Compounding::Continuous);
+
+        // Getters
+        assert_eq!(
+            simple_rate.get_compounding(),
+            Compounding::Simple(Frequency::Annual)
+        );
+        assert_eq!(simple_rate.get_day_counter(), Actual360);
+        assert_eq!(simple_rate.get_rate(), 0.05);
+
+        // PartialEq
+        assert_eq!(
+            simple_rate,
+            InterestRate::<USD, Actual360>::new(
+                0.05,
+                Actual360,
+                Compounding::Simple(Frequency::Annual)
+            )
+        );
+
+        // Discount Factor
+        assert_eq!(
+            simple_rate.discount_factor(DayCountFraction::new(1.0)),
+            0.9523809523809523
+        );
+        assert_eq!(
+            compound_rate.discount_factor(DayCountFraction::new(1.0)),
+            0.9515242752171532
+        );
+        assert_eq!(
+            continuous_rate.discount_factor(DayCountFraction::new(1.0)),
+            0.9512294245007139
+        );
+
+        // Implied Interest Rate from Compound Factor
+        assert_eq!(
+            implied_rate_from_compound_factor::<USD, _>(
+                1.5,
+                DayCountFraction::new(1.0),
+                Actual360,
+                Compounding::Simple(Frequency::Annual)
+            )
+            .unwrap(),
+            InterestRate::<USD, _>::new(0.5, Actual360, Compounding::Simple(Frequency::Annual))
+        );
+        assert_eq!(
+            implied_rate_from_compound_factor::<USD, Actual360>(
+                1.5,
+                DayCountFraction::new(1.0),
+                Actual360,
+                Compounding::Compounding(Frequency::Quarterly)
+            )
+            .unwrap(),
+            InterestRate::<USD, _>::new(
+                0.4267276788012859,
+                Actual360,
+                Compounding::Compounding(Frequency::Quarterly)
+            ),
+        );
+        assert_eq!(
+            implied_rate_from_compound_factor::<USD, Actual360>(
+                1.5,
+                DayCountFraction::new(1.0),
+                Actual360,
+                Compounding::Continuous
+            )
+            .unwrap(),
+            InterestRate::<USD, _>::new(0.4054651081081644, Actual360, Compounding::Continuous),
+        );
     }
 }

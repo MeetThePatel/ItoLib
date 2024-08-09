@@ -155,6 +155,7 @@ impl Div<i64> for Duration {
 #[cfg(test)]
 mod tests {
     use hifitime::Unit;
+    use ordered_float::OrderedFloat;
 
     use crate::time::Duration;
 
@@ -192,6 +193,15 @@ mod tests {
         assert_eq!(dur + Unit::Minute, dur + dur);
         assert_eq!(Unit::Minute + dur, dur + dur);
         assert_eq!(dur - Unit::Minute, Duration::new_from_minutes(0.0));
+
+        assert_eq!(
+            dur * OrderedFloat::<f64>(2.0),
+            Duration::new_from_minutes(2.0)
+        );
+        assert_eq!(
+            OrderedFloat::<f64>(2.0) * dur,
+            Duration::new_from_minutes(2.0)
+        );
 
         assert_eq!(dur * 2.0, Duration::new_from_minutes(2.0));
         assert_eq!(2.0 * dur, Duration::new_from_minutes(2.0));
