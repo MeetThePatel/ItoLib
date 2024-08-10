@@ -6,8 +6,8 @@ use ordered_float::OrderedFloat;
 use crate::term_structures::volatility_structure::{
     BlackVolatilityTermStructure, VolatilityTermStructure,
 };
+use crate::term_structures::TermStructure;
 use crate::term_structures::TermStructureStrikeValidity;
-use crate::term_structures::{TermStructure, TermStructureDateTimeValidity};
 use crate::time::DateTime;
 use crate::types::{Strike, Volatility};
 
@@ -71,12 +71,8 @@ where
         DateTime::new_from_ymd(9999, 12, 31)
     }
 
-    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
-        if dt >= self.reference_date {
-            TermStructureDateTimeValidity::Valid
-        } else {
-            TermStructureDateTimeValidity::Invalid
-        }
+    fn is_datetime_valid(&self, dt: DateTime) -> bool {
+        dt >= self.reference_date
     }
 }
 

@@ -58,6 +58,12 @@ pub fn format_ymd() -> Format {
     Format::from_str("%y/%m/%d").unwrap()
 }
 
+impl Default for DateTime {
+    fn default() -> Self {
+        Self::now()
+    }
+}
+
 impl Deref for DateTime {
     type Target = Epoch;
 
@@ -89,7 +95,7 @@ impl From<DateTime> for f64 {
 }
 impl From<DateTime> for OrderedFloat<f64> {
     fn from(value: DateTime) -> Self {
-        OrderedFloat(value.0.to_utc_seconds())
+        Self(value.0.to_utc_seconds())
     }
 }
 
@@ -148,7 +154,7 @@ mod test {
 
     #[test]
     fn test_casts() {
-        let mut dt = DateTime::new_from_ymd(2024, 1, 1);
+        let mut dt = DateTime::default();
 
         let float_repr = f64::from(dt);
         assert_eq!(dt.to_utc_seconds(), float_repr);

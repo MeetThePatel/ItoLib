@@ -36,7 +36,7 @@ mod tests {
         ];
 
         for (compounding, expected_output) in test_cases {
-            assert_eq!(format!("{}", compounding), expected_output);
+            assert_eq!(format!("{compounding}"), expected_output);
         }
     }
 }

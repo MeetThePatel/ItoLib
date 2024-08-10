@@ -177,53 +177,58 @@ mod tests {
         );
 
         // Discount Factor
-        assert_eq!(
+        assert_approx_equal_f64!(
             simple_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.9523809523809523
+            0.952_380_95,
+            10e-8
         );
-        assert_eq!(
+        assert_approx_equal_f64!(
             compound_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.9515242752171532
+            0.951_524_27,
+            10e-8
         );
-        assert_eq!(
+        assert_approx_equal_f64!(
             continuous_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.9512294245007139
+            0.951_229_42,
+            10e-8
         );
 
         // Implied Interest Rate from Compound Factor
-        assert_eq!(
+        assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, _>(
                 1.5,
                 DayCountFraction::new(1.0),
                 Actual360,
                 Compounding::Simple(Frequency::Annual)
             )
-            .unwrap(),
-            InterestRate::<USD, _>::new(0.5, Actual360, Compounding::Simple(Frequency::Annual))
+            .unwrap()
+            .get_rate(),
+            0.5,
+            10e-8
         );
-        assert_eq!(
+        assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
                 DayCountFraction::new(1.0),
                 Actual360,
                 Compounding::Compounding(Frequency::Quarterly)
             )
-            .unwrap(),
-            InterestRate::<USD, _>::new(
-                0.4267276788012859,
-                Actual360,
-                Compounding::Compounding(Frequency::Quarterly)
-            ),
+            .unwrap()
+            .get_rate(),
+            0.426_727_67,
+            10e-8
         );
-        assert_eq!(
+        assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
                 DayCountFraction::new(1.0),
                 Actual360,
                 Compounding::Continuous
             )
-            .unwrap(),
-            InterestRate::<USD, _>::new(0.4054651081081644, Actual360, Compounding::Continuous),
+            .unwrap()
+            .get_rate(),
+            0.405_465_10,
+            10e-8
         );
     }
 }

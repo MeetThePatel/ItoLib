@@ -1,14 +1,11 @@
 use day_count_conventions::DayCounter;
-use derive_builder::{Builder, UninitializedFieldError};
 use num::Bounded;
 
 use crate::math::interpolation::Interpolator;
 use crate::term_structures::volatility_structure::{
     BlackVolatilityTermStructure, VolatilityTermStructure,
 };
-use crate::term_structures::{
-    TermStructure, TermStructureDateTimeValidity, TermStructureStrikeValidity,
-};
+use crate::term_structures::{TermStructure, TermStructureStrikeValidity};
 use crate::time::DateTime;
 use crate::types::{Strike, Volatility};
 
@@ -16,18 +13,12 @@ use crate::types::{Strike, Volatility};
 //  Definition
 //  ------------------------------------------------------------------------------------------------
 
-#[derive(Builder)]
-#[builder(build_fn(
-    validate = "Self::validate",
-    error = "BlackVolatilityCurveBuilderError"
-))]
 pub struct BlackVolatilityCurve<I>
 where
     I: Interpolator<DateTime, Volatility>,
 {
     interpolator: I,
 
-    #[builder(default = "DateTime::now()")]
     reference_date: DateTime,
 }
 
@@ -35,75 +26,46 @@ where
 //  Builder
 //  ------------------------------------------------------------------------------------------------
 
+pub struct BlackVolatilityCurveBuilder<I>
+where
+    I: Interpolator<DateTime, Volatility>,
+{
+    interpolator: I,
+    reference_date: Option<DateTime>,
+}
+
 impl<I> BlackVolatilityCurveBuilder<I>
 where
     I: Interpolator<DateTime, Volatility>,
 {
-    pub fn add_points(&mut self, points: &[(DateTime, Volatility)]) -> &mut Self {
-        todo!();
-        // let mut pts = points.to_vec();
-        // pts.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
-        // let (mut datetimes, mut volatilities) = pts.into_iter().unzip();
-
-        // if self.datetimes.is_none() {
-        //     self.datetimes = Some(datetimes);
-        // } else {
-        //     self.datetimes.as_mut().unwrap().append(&mut datetimes);
-        // }
-        // if self.volatilities.is_none() {
-        //     self.volatilities = Some(volatilities);
-        // } else {
-        //     self.volatilities
-        //         .as_mut()
-        //         .unwrap()
-        //         .append(&mut volatilities);
-        // }
-
+    /// Add a point to the volatility curve.
+    pub fn add_point(&mut self, point: (DateTime, Volatility)) -> &mut Self {
+        let _ = self.interpolator.add_point(point);
         self
     }
 
-    pub fn validate(&self) -> Result<(), BlackVolatilityCurveBuilderError> {
-        // Check if empty datetimes.
-        // if self.datetimes.is_none() {
-        //     return Err(BlackVolatilityCurveBuilderError::NoDateTimesProvided);
-        // }
-
-        // Check if empty volatilities.
-        // if self.volatilities.is_none() {
-        //     return Err(BlackVolatilityCurveBuilderError::NoVolatilitiesProvided);
-        // }
-
-        // Check if even lengths.
-        // let datetimes_len = self.datetimes.as_ref().unwrap().len();
-        // let volatilities_len = self.volatilities.as_ref().unwrap().len();
-        // if datetimes_len != volatilities_len {
-        //     return Err(BlackVolatilityCurveBuilderError::UnevenLengths);
-        // }
-
-        Ok(())
+    /// Add points to the volatility curve.
+    pub fn add_points(&mut self, points: &[(DateTime, Volatility)]) -> &mut Self {
+        let _ = self.interpolator.add_points(points.to_vec());
+        self
     }
 
-    // pub fn build(&self) -> Result<BlackVolatilityCurve<I>, BlackVolatilityCurveBuilderError> {
-    //     todo!();
-    //     // let interpolator = todo!();
-    //     // Ok(BlackVolatilityCurve {
-    //     //     datetimes: self.datetimes.as_ref().unwrap().to_vec(),
-    //     //     volatilities: self.volatilities.as_ref().unwrap().to_vec(),
-    //     //     interpolator,
-    //     //     reference_date: self.reference_date.unwrap(),
-    //     // })
-    // }
-}
+    /// Set the reference date for the volatility curve.
+    pub fn reference_date(&mut self, reference_date: DateTime) -> &mut Self {
+        self.reference_date = Some(reference_date);
+        self
+    }
 
-pub enum BlackVolatilityCurveBuilderError {
-    NoDateTimesProvided,
-    NoVolatilitiesProvided,
-    NoInterpolatorProvided,
-    UnevenLengths,
-}
-impl From<UninitializedFieldError> for BlackVolatilityCurveBuilderError {
-    fn from(_value: UninitializedFieldError) -> Self {
-        Self::NoInterpolatorProvided
+    /// Build the volatility curve.
+    pub fn build(mut self) -> BlackVolatilityCurve<I> {
+        if self.reference_date.is_none() {
+            self.reference_date = Some(DateTime::now());
+        }
+        BlackVolatilityCurve {
+            interpolator: self.interpolator,
+            // Safe to unwrap, because we gave default value above.
+            reference_date: self.reference_date.unwrap(),
+        }
     }
 }
 
@@ -121,18 +83,12 @@ where
     }
 
     fn get_max_datetime(&self) -> DateTime {
-        todo!()
-        // self.datetimes.last().copied().unwrap()
+        self.interpolator.range().unwrap().1
     }
 
-    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
-        if dt >= <Self as TermStructure<D>>::get_reference_date(self)
+    fn is_datetime_valid(&self, dt: DateTime) -> bool {
+        dt >= <Self as TermStructure<D>>::get_reference_date(self)
             && dt <= <Self as TermStructure<D>>::get_max_datetime(self)
-        {
-            TermStructureDateTimeValidity::Valid
-        } else {
-            TermStructureDateTimeValidity::Invalid
-        }
     }
 }
 

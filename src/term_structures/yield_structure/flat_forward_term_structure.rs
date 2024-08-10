@@ -1,7 +1,7 @@
 use crate::interest_rate::{implied_rate_from_compound_factor, InterestRate};
 use crate::money::Currency;
 use crate::term_structures::yield_structure::YieldTermStructure;
-use crate::term_structures::{TermStructure, TermStructureDateTimeValidity, TermStructureError};
+use crate::term_structures::{TermStructure, TermStructureError};
 use crate::time::DateTime;
 use crate::types::DiscountFactor;
 
@@ -34,12 +34,8 @@ where
         DateTime::new_from_ymd(9999, 12, 31)
     }
 
-    fn validate_datetime(&self, dt: DateTime) -> TermStructureDateTimeValidity {
-        if dt >= self.reference_date && dt <= self.get_max_datetime() {
-            TermStructureDateTimeValidity::Valid
-        } else {
-            TermStructureDateTimeValidity::Invalid
-        }
+    fn is_datetime_valid(&self, dt: DateTime) -> bool {
+        dt >= self.reference_date && dt <= self.get_max_datetime()
     }
 }
 
@@ -49,7 +45,7 @@ where
     D: DayCounter,
 {
     fn discount_factor(&self, t: DateTime) -> Result<DiscountFactor, TermStructureError> {
-        if self.validate_datetime(t) == TermStructureDateTimeValidity::Invalid {
+        if !self.is_datetime_valid(t) {
             return Err(TermStructureError::InvalidDateTime);
         }
 
@@ -65,7 +61,7 @@ where
     }
 
     fn zero_rate(&self, t: DateTime) -> Result<InterestRate<C, D>, TermStructureError> {
-        if self.validate_datetime(t) == TermStructureDateTimeValidity::Invalid {
+        if !self.is_datetime_valid(t) {
             return Err(TermStructureError::InvalidDateTime);
         }
 
@@ -97,10 +93,10 @@ where
         t1: DateTime,
         t2: DateTime,
     ) -> Result<InterestRate<C, D>, TermStructureError> {
-        if self.validate_datetime(t1) == TermStructureDateTimeValidity::Invalid {
+        if !self.is_datetime_valid(t1) {
             return Err(TermStructureError::InvalidDateTime);
         }
-        if self.validate_datetime(t2) == TermStructureDateTimeValidity::Invalid {
+        if !self.is_datetime_valid(t2) {
             return Err(TermStructureError::InvalidDateTime);
         }
         if t2 < t1 {
@@ -144,7 +140,7 @@ mod tests {
             yield_structure::{
                 flat_forward_term_structure::FlatForwardTermStructureBuilder, YieldTermStructure,
             },
-            TermStructure, TermStructureDateTimeValidity, TermStructureError,
+            TermStructure, TermStructureError,
         },
         time::DateTime,
     };
@@ -163,10 +159,7 @@ mod tests {
             .build()
             .unwrap();
 
-        assert_eq!(
-            term_structure.validate_datetime(DateTime::new_from_ymd(2000, 1, 1)),
-            TermStructureDateTimeValidity::Invalid
-        );
+        assert!(!term_structure.is_datetime_valid(DateTime::new_from_ymd(2000, 1, 1)));
         assert_eq!(
             term_structure
                 .discount_factor(DateTime::new_from_ymd(2000, 1, 1))
