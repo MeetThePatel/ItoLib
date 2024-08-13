@@ -90,7 +90,7 @@ impl Sub<Unit> for Duration {
     }
 }
 
-/// Duration * Into<f64>
+/// Duration * `Into<f64>`
 impl<T> Mul<T> for Duration
 where
     T: Into<f64>,

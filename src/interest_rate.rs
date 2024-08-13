@@ -5,8 +5,12 @@ use crate::money::Currency;
 use crate::types::{CompoundFactor, DiscountFactor, Percentage};
 
 use day_count_conventions::{DayCountFraction, DayCounter};
+use num::Float;
 use ordered_float::OrderedFloat;
 
+/// Interest Rate
+///
+/// An interest rate has an associated currency, day counting convention, and compounding method.
 #[derive(Debug, Copy, Clone)]
 pub struct InterestRate<C, D>
 where
@@ -24,6 +28,7 @@ where
     C: Currency,
     D: DayCounter,
 {
+    /// Create a new interest rate.
     #[must_use]
     pub fn new(rate: impl Into<Percentage>, day_counter: D, compounding: Compounding) -> Self {
         Self {
@@ -34,18 +39,21 @@ where
         }
     }
 
+    /// Get the rate.
     #[inline]
     #[must_use]
     pub const fn get_rate(&self) -> Percentage {
         self.rate
     }
 
+    /// Get the day counting convention used.
     #[inline]
     #[must_use]
     pub const fn get_day_counter(&self) -> D {
         self.day_counter
     }
 
+    /// Get the compounding method.
     #[inline]
     #[must_use]
     pub const fn get_compounding(&self) -> Compounding {
@@ -59,6 +67,12 @@ where
     D: DayCounter,
 {
     /// Discount factor implied by the rate at time $t$.
+    ///
+    /// To calculate the discount factor:
+    /// $$
+    ///     DF \coloneqq \frac{1}{CF}
+    /// $$
+    /// where $CF$ is the compound factor.
     #[must_use]
     pub fn discount_factor(&self, year_fraction: DayCountFraction<D>) -> DiscountFactor {
         OrderedFloat(1.0) / self.compound_factor(year_fraction)
@@ -74,11 +88,16 @@ where
     #[must_use]
     pub fn compound_factor(&self, year_fraction: DayCountFraction<D>) -> CompoundFactor {
         OrderedFloat(match self.compounding {
-            Compounding::Simple(_) => self.rate.mul_add(year_fraction.get_fraction(), 1.0),
-            Compounding::Compounding(freq) => (OrderedFloat(1.0)
-                + self.rate / f64::from(freq as i32))
-            .powf(f64::from(freq as i32) * year_fraction.get_fraction()),
-            Compounding::Continuous => (self.rate * year_fraction.get_fraction()).exp(),
+            Compounding::Simple(_) => *self.rate.mul_add(
+                OrderedFloat(year_fraction.get_fraction()),
+                OrderedFloat(1.0),
+            ),
+            Compounding::Compounding(freq) => {
+                *(OrderedFloat(1.0) + self.rate / f64::from(freq as i32)).powf(OrderedFloat(
+                    f64::from(freq as i32) * year_fraction.get_fraction(),
+                ))
+            }
+            Compounding::Continuous => *(self.rate * year_fraction.get_fraction()).exp(),
         })
     }
 }
@@ -93,6 +112,22 @@ where
     }
 }
 
+/// Calculate the interest rate implied by a compound factor.
+///
+/// Simple:
+/// $$
+///     CF = (1 + r \tau) \implies r = \frac{CF - 1}{\tau}
+/// $$
+///
+/// Compounding:
+/// $$
+///     CF = \left(1 + \frac{r}{n}\right)^{n \tau} \implies r = n (CF^{\frac{1}{n \tau}} - 1)
+/// $$
+///
+/// Continuous:
+/// $$
+///     CF = e^{r \tau} \implies r = \frac{\ln{C}}{\tau}
+/// $$
 pub fn implied_rate_from_compound_factor<C, D>(
     compound_factor: impl Into<CompoundFactor>,
     day_count_fraction: DayCountFraction<D>,
@@ -103,40 +138,27 @@ where
     C: Currency,
     D: DayCounter,
 {
-    match compounding {
+    let implied_rate: OrderedFloat<f64> = match compounding {
         Compounding::Simple(_) => {
-            let r = (compound_factor.into() - 1.0) / day_count_fraction.get_fraction();
-            Some(InterestRate {
-                rate: r,
-                day_counter: day_count_convention,
-                compounding,
-                _marker: PhantomData,
-            })
+            (compound_factor.into() - 1.0) / day_count_fraction.get_fraction()
         }
-        Compounding::Compounding(f) => {
-            let f = f64::from(f as u32);
-            let r = (compound_factor
-                .into()
-                .powf(1.0 / (f * day_count_fraction.get_fraction()))
-                - 1.0)
-                * f;
-            Some(InterestRate {
-                rate: OrderedFloat(r),
-                day_counter: day_count_convention,
-                compounding,
-                _marker: PhantomData,
-            })
+        Compounding::Compounding(freq) => {
+            let freq = f64::from(freq as u32);
+            OrderedFloat::powf(
+                compound_factor.into(),
+                OrderedFloat(1.0 / (freq * day_count_fraction.get_fraction())),
+            )
         }
         Compounding::Continuous => {
-            let r = compound_factor.into().ln() / day_count_fraction.get_fraction();
-            Some(InterestRate {
-                rate: OrderedFloat(r),
-                day_counter: day_count_convention,
-                compounding,
-                _marker: PhantomData,
-            })
+            OrderedFloat::ln(compound_factor.into()) / day_count_fraction.get_fraction()
         }
-    }
+    };
+    Some(InterestRate {
+        rate: implied_rate,
+        day_counter: day_count_convention,
+        compounding,
+        _marker: PhantomData,
+    })
 }
 
 #[cfg(test)]

@@ -2,10 +2,16 @@ use std::fmt::Display;
 
 use crate::time::Frequency;
 
+/// Compounding method.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Compounding {
+    /// Simple interest: $(1 + \frac{r \tau}{n})$ where $n$ is the number of periods per year.
     Simple(Frequency),
+
+    /// Compound interest: $(1 + \frac{r}{n})^{\tau n}$ where $n$ is the number of periods per year.
     Compounding(Frequency),
+
+    /// Continuous interest: $e^{r \tau}$
     Continuous,
 }
 
