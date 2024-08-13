@@ -144,10 +144,11 @@ where
         }
         Compounding::Compounding(freq) => {
             let freq = f64::from(freq as u32);
-            OrderedFloat::powf(
-                compound_factor.into(),
-                OrderedFloat(1.0 / (freq * day_count_fraction.get_fraction())),
-            )
+            OrderedFloat::from(freq)
+                * (OrderedFloat::powf(
+                    compound_factor.into(),
+                    OrderedFloat(1.0 / (freq * day_count_fraction.get_fraction())),
+                ) - 1.0)
         }
         Compounding::Continuous => {
             OrderedFloat::ln(compound_factor.into()) / day_count_fraction.get_fraction()
@@ -219,7 +220,7 @@ mod tests {
         assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
-                &dcf1,
+                &DayCountFraction::new(1.0),
                 Actual360,
                 Compounding::Compounding(Frequency::Quarterly)
             )
@@ -231,7 +232,7 @@ mod tests {
         assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
-                &dcf1,
+                &DayCountFraction::new(1.0),
                 Actual360,
                 Compounding::Continuous
             )
