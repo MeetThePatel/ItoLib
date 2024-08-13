@@ -55,7 +55,7 @@ mod tests {
         ];
 
         for (freq, expected_output) in test_cases {
-            assert_eq!(format!("{}", freq), expected_output);
+            assert_eq!(format!("{freq}"), expected_output);
         }
     }
 }

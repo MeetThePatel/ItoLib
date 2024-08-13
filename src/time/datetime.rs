@@ -6,20 +6,28 @@ use ordered_float::OrderedFloat;
 
 use super::Duration;
 
+///
+///
+/// This is a thin wrapper around `HifiTime`'s Epoch.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 pub struct DateTime(Epoch);
 
 impl DateTime {
+    /// Create a new `DateTime` from an Epoch.
     #[must_use]
     pub const fn new_from_epoch(dt: &Epoch) -> Self {
         Self(*dt)
     }
 
+    /// Create a new `DateTime` from year-month-day.
     #[must_use]
     pub fn new_from_ymd(year: i32, month: u8, day: u8) -> Self {
         Self(Epoch::from_gregorian_utc_at_midnight(year, month, day))
     }
 
+    /// Create a new `DateTime` from year-month-day-hour-minute-second.
+    ///
+    /// This sets the nanoseconds equal to zero.
     #[must_use]
     pub fn new_from_ymd_hms(
         year: i32,
@@ -34,11 +42,19 @@ impl DateTime {
         ))
     }
 
+    /// Returns current `DateTime`
+    ///
+    /// # Panics
+    /// if there was an issue initializing system time.
     #[must_use]
     pub fn now() -> Self {
         Self(Epoch::now().unwrap())
     }
 
+    /// Format the datetime using a format string.
+    ///
+    /// # Errors
+    /// Will return `ParsingErrors` if there was an issue parsing the format string.
     pub fn format(&self, s: &str) -> Result<String, hifitime::ParsingErrors> {
         Ok(Formatter::new(**self, format(s)?).to_string())
     }
@@ -49,13 +65,18 @@ impl DateTime {
     }
 }
 
+/// Create a format for formating datetimes.
+///
+/// # Errors
+/// Will return `ParsingErrors` if there was an issue parsing the format string.
 pub fn format(s: &str) -> Result<Format, hifitime::ParsingErrors> {
     Format::from_str(s)
 }
 
+/// Create a formatter that outputs Y/M/D.
 #[must_use]
 pub fn format_ymd() -> Format {
-    Format::from_str("%y/%m/%d").unwrap()
+    Format::from_str("%y/%m/%d").unwrap_or_default()
 }
 
 impl Default for DateTime {
@@ -125,6 +146,7 @@ impl std::fmt::Display for DateTime {
 #[cfg(test)]
 mod test {
     use hifitime::Epoch;
+    use num::ToPrimitive;
     use ordered_float::OrderedFloat;
 
     use crate::time::Duration;
@@ -162,7 +184,7 @@ mod test {
         dt = DateTime::new_from_ymd(2025, 1, 1);
 
         let int_repr = i64::from(dt);
-        assert_eq!(dt.to_utc_seconds() as i64, int_repr);
+        assert_eq!(dt.to_utc_seconds().to_i64().unwrap(), int_repr);
 
         let ordered_float_repr = OrderedFloat::<f64>::from(dt);
         assert_eq!(dt.to_utc_seconds(), *ordered_float_repr);

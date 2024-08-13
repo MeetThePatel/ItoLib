@@ -74,7 +74,7 @@ where
     /// $$
     /// where $CF$ is the compound factor.
     #[must_use]
-    pub fn discount_factor(&self, year_fraction: DayCountFraction<D>) -> DiscountFactor {
+    pub fn discount_factor(&self, year_fraction: &DayCountFraction<D>) -> DiscountFactor {
         OrderedFloat(1.0) / self.compound_factor(year_fraction)
     }
 
@@ -86,7 +86,7 @@ where
     ///
     /// Continuous: $e^{rt}$
     #[must_use]
-    pub fn compound_factor(&self, year_fraction: DayCountFraction<D>) -> CompoundFactor {
+    pub fn compound_factor(&self, year_fraction: &DayCountFraction<D>) -> CompoundFactor {
         OrderedFloat(match self.compounding {
             Compounding::Simple(_) => *self.rate.mul_add(
                 OrderedFloat(year_fraction.get_fraction()),
@@ -130,7 +130,7 @@ where
 /// $$
 pub fn implied_rate_from_compound_factor<C, D>(
     compound_factor: impl Into<CompoundFactor>,
-    day_count_fraction: DayCountFraction<D>,
+    day_count_fraction: &DayCountFraction<D>,
     day_count_convention: D,
     compounding: Compounding,
 ) -> Option<InterestRate<C, D>>
@@ -197,29 +197,17 @@ mod tests {
                 Compounding::Simple(Frequency::Annual)
             )
         );
-
+        let dcf1 = DayCountFraction::new(1.0);
         // Discount Factor
-        assert_approx_equal_f64!(
-            simple_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.952_380_95,
-            10e-8
-        );
-        assert_approx_equal_f64!(
-            compound_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.951_524_27,
-            10e-8
-        );
-        assert_approx_equal_f64!(
-            continuous_rate.discount_factor(DayCountFraction::new(1.0)),
-            0.951_229_42,
-            10e-8
-        );
+        assert_approx_equal_f64!(simple_rate.discount_factor(&dcf1), 0.952_380_95, 10e-8);
+        assert_approx_equal_f64!(compound_rate.discount_factor(&dcf1), 0.951_524_27, 10e-8);
+        assert_approx_equal_f64!(continuous_rate.discount_factor(&dcf1), 0.951_229_42, 10e-8);
 
         // Implied Interest Rate from Compound Factor
         assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, _>(
                 1.5,
-                DayCountFraction::new(1.0),
+                &dcf1,
                 Actual360,
                 Compounding::Simple(Frequency::Annual)
             )
@@ -231,7 +219,7 @@ mod tests {
         assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
-                DayCountFraction::new(1.0),
+                &dcf1,
                 Actual360,
                 Compounding::Compounding(Frequency::Quarterly)
             )
@@ -243,7 +231,7 @@ mod tests {
         assert_approx_equal_f64!(
             implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
-                DayCountFraction::new(1.0),
+                &dcf1,
                 Actual360,
                 Compounding::Continuous
             )

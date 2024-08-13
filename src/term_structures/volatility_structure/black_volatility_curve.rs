@@ -1,4 +1,4 @@
-use day_count_conventions::{Actual360, DayCounter};
+use day_count_conventions::DayCounter;
 use num::Bounded;
 
 use crate::math::interpolation::{InterpolationResult, Interpolator};
@@ -31,6 +31,7 @@ where
 //  Builder
 //  ------------------------------------------------------------------------------------------------
 
+#[allow(clippy::module_name_repetitions)]
 pub struct BlackVolatilityCurveBuilder<I, D>
 where
     I: Interpolator<DateTime, Volatility>,
@@ -70,18 +71,14 @@ where
     }
 
     /// Build the volatility curve.
-    pub fn build(mut self) -> BlackVolatilityCurve<I, D> {
-        if self.reference_date.is_none() {
-            self.reference_date = Some(DateTime::now());
-        }
-        if self.day_count_convention.is_none() {
-            self.day_count_convention = Some(D::default());
-        }
+    pub fn build(self) -> BlackVolatilityCurve<I, D> {
+        let reference_date = self.reference_date.map_or_else(DateTime::now, |d| d);
+        let day_counter = self.day_count_convention.unwrap_or_default();
         BlackVolatilityCurve {
             interpolator: self.interpolator,
             // Safe to unwrap, because we gave default value above.
-            reference_date: self.reference_date.unwrap(),
-            day_counter: self.day_count_convention.unwrap(),
+            reference_date,
+            day_counter,
         }
     }
 }
@@ -137,7 +134,9 @@ where
         maturity: DateTime,
         _strike: Strike,
     ) -> BlackVolatilityTermStructureResult {
-        use BlackVolatilityTermStructureResult::*;
+        use BlackVolatilityTermStructureResult::{
+            ExistingValue, InterpolatedValue, NoPoints, OutOfRange,
+        };
         match self.interpolator.interpolate(maturity) {
             InterpolationResult::ExistingValue(v) => ExistingValue(v),
             InterpolationResult::InterpolatedValue(v) => InterpolatedValue(v),

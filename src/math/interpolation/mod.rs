@@ -2,6 +2,7 @@ use crate::math::FloatScalable;
 use std::fmt::Debug;
 
 /// Trait describing interpolation index requirements.
+#[allow(clippy::module_name_repetitions)]
 pub trait InterpolationIndex:
     Into<OrderedFloat<f64>> + PartialOrd + Ord + Debug + Copy + Clone + Default
 {
@@ -35,6 +36,7 @@ where
     fn range(&self) -> Option<(I, I)>;
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[non_exhaustive]
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum InterpolationResult<V>

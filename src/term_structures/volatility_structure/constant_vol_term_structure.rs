@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use day_count_conventions::DayCounter;
 use derive_builder::{Builder, UninitializedFieldError};
 use num::Bounded;
@@ -57,6 +55,7 @@ where
     }
 }
 
+#[allow(clippy::module_name_repetitions)]
 #[derive(Debug)]
 pub enum ConstantVolTermStructureBuilderError {
     NoVolatilityProvided,

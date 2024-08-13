@@ -39,6 +39,7 @@ where
     }
 
     /// Create a new `LinearInterpolator` from a set of points.
+    #[must_use]
     pub fn new_from_points(points: Vec<(I, V)>) -> Self {
         let mut ret = Self {
             points: BTreeMap::new(),
@@ -68,7 +69,7 @@ where
     I: InterpolationIndex,
     V: FloatScalable,
 {
-    /// Adds a point to the LinearInterpolator.
+    /// Adds a point to the `LinearInterpolator`.
     ///
     /// If the interpolator did not have this index present, `None` is returned.
     /// If the interpolator already had a point at this index, the value is updated
@@ -77,14 +78,14 @@ where
         self.points.insert(point.0, point.1)
     }
 
-    /// Adds multiple points to the LinearInterpolator.
+    /// Adds multiple points to the `LinearInterpolator`.
     ///
-    /// Each insertion returns a value as described in [LinearInterpolator::add_point], and is returned as a `Vec`.
+    /// Each insertion returns a value as described in [`LinearInterpolator::add_point`], and is returned as a `Vec`.
     fn add_points(&mut self, points: Vec<(I, V)>) -> Vec<Option<V>> {
         points.into_iter().map(|pt| self.add_point(pt)).collect()
     }
 
-    /// Removes a point from the LinearInterpolator.
+    /// Removes a point from the `LinearInterpolator`.
     ///
     /// If the interpolator contained the point, it returns the value at the point.
     /// If the key was not in the interpolator, `None` is returned.
@@ -92,19 +93,19 @@ where
         self.points.remove(&point)
     }
 
-    /// Removes multiple points from the LinearInterpolator.
+    /// Removes multiple points from the `LinearInterpolator`.
     ///
-    /// Each deletion returns a value as described by [LinearInterpolator::remove_point], and is returned as a `Vec`.
+    /// Each deletion returns a value as described by [`LinearInterpolator::remove_point`], and is returned as a `Vec`.
     fn remove_points(&mut self, points: Vec<I>) -> Vec<Option<V>> {
         points.into_iter().map(|pt| self.remove_point(pt)).collect()
     }
 
     /// Interpolate at a point.
     ///
-    /// Returns [InterpolationResult::OutOfRange] if the point is out of the range of the interpolator.
-    /// Returns [InterpolationResult::ExistingValue] if the point was one of the given points (no interpolation necessary).
-    /// Returns [InterpolationResult::InterpolatedValue] is the point required interpolation.
-    /// Returns [InterpolationResult::NoPoints] if the interpolator does not have any points.
+    /// Returns [`InterpolationResult::OutOfRange`] if the point is out of the range of the interpolator.
+    /// Returns [`InterpolationResult::ExistingValue`] if the point was one of the given points (no interpolation necessary).
+    /// Returns [`InterpolationResult::InterpolatedValue`] is the point required interpolation.
+    /// Returns [`InterpolationResult::NoPoints`] if the interpolator does not have any points.
     fn interpolate(&self, point: I) -> InterpolationResult<V> {
         // Check if the interpolator is empty.
         if self.range().is_none() {
@@ -138,7 +139,7 @@ where
         InterpolationResult::InterpolatedValue(val)
     }
 
-    /// Returns the effective interpolation range of the LinearInterpolator.
+    /// Returns the effective interpolation range of the `LinearInterpolator`.
     fn range(&self) -> Option<(I, I)> {
         if self.points.is_empty() {
             None

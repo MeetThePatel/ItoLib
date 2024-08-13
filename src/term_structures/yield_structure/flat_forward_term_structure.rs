@@ -61,7 +61,7 @@ where
             year_fraction = DayCountFraction::new(10e-8);
         }
 
-        Ok(self.rate.discount_factor(year_fraction))
+        Ok(self.rate.discount_factor(&year_fraction))
     }
 
     fn zero_rate(&self, t: DateTime) -> Result<InterestRate<C, D>, TermStructureError> {
@@ -85,7 +85,7 @@ where
 
         Ok(implied_rate_from_compound_factor(
             compound_factor,
-            day_count_fraction,
+            &day_count_fraction,
             day_count_convention,
             compounding,
         )
@@ -124,7 +124,7 @@ where
 
         Ok(implied_rate_from_compound_factor(
             compound_factor,
-            day_count_fraction,
+            &day_count_fraction,
             day_count_convention,
             self.rate.get_compounding(),
         )

@@ -117,7 +117,7 @@ impl Mul<Duration> for i64 {
         Duration(rhs.0 * self)
     }
 }
-/// OrderedFloat * Duration
+/// `OrderedFloat` * Duration
 impl Mul<Duration> for OrderedFloat<f64> {
     type Output = Duration;
 
