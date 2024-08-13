@@ -25,6 +25,9 @@ where
     /// This is the last date that the term structure can make predictions on.
     fn get_max_datetime(&self) -> DateTime;
 
+    /// The day counting convention used by the term structure.
+    fn get_day_counter(&self) -> D;
+
     /// Ensure that the term structure is applicable to the date.
     ///
     /// This is a utility method that makes sure that the term structure can make predictions about a given date.

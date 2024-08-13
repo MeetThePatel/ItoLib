@@ -11,12 +11,24 @@ pub trait BlackVolatilityTermStructure<D>: VolatilityTermStructure<D>
 where
     D: DayCounter,
 {
-    fn black_volatility(&self, maturity: DateTime, strike: Strike) -> Volatility;
+    fn black_volatility(
+        &self,
+        maturity: DateTime,
+        strike: Strike,
+    ) -> BlackVolatilityTermStructureResult;
 
     fn black_forward_volatility(
         &self,
         start_date: DateTime,
         end_date: DateTime,
         strike: Strike,
-    ) -> Volatility;
+    ) -> BlackVolatilityTermStructureResult;
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum BlackVolatilityTermStructureResult {
+    InterpolatedValue(Volatility),
+    ExistingValue(Volatility),
+    OutOfRange,
+    NoPoints,
 }

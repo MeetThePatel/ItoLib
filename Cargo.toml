@@ -4,12 +4,13 @@ version = "0.0.1"
 edition = "2021"
 
 [dependencies]
-day_count_conventions = { version = "0.1.5", features = ["hifitime"] }
+day_count_conventions = { version = "0.1.7", features = ["hifitime"] }
 derive_builder = "0.20.0"
 hifitime = "3.9.0"
 num = "0.4.3"
 ordered-float = "4.2.2"
 permutation = "0.4.1"
+statrs = "0.17.1"
 thiserror = "1.0.63"
 
 [package.metadata.docs.rs]

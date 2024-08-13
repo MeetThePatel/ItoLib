@@ -1,7 +1,7 @@
-use day_count_conventions::DayCounter;
+use day_count_conventions::{Actual360, DayCounter};
 use num::Bounded;
 
-use crate::math::interpolation::Interpolator;
+use crate::math::interpolation::{InterpolationResult, Interpolator};
 use crate::term_structures::volatility_structure::{
     BlackVolatilityTermStructure, VolatilityTermStructure,
 };
@@ -9,34 +9,42 @@ use crate::term_structures::{TermStructure, TermStructureStrikeValidity};
 use crate::time::DateTime;
 use crate::types::{Strike, Volatility};
 
+use super::black_volatility_term_structure::BlackVolatilityTermStructureResult;
+
 //  ------------------------------------------------------------------------------------------------
 //  Definition
 //  ------------------------------------------------------------------------------------------------
 
-pub struct BlackVolatilityCurve<I>
+pub struct BlackVolatilityCurve<I, D>
 where
     I: Interpolator<DateTime, Volatility>,
+    D: DayCounter,
 {
     interpolator: I,
 
     reference_date: DateTime,
+
+    day_counter: D,
 }
 
 //  ------------------------------------------------------------------------------------------------
 //  Builder
 //  ------------------------------------------------------------------------------------------------
 
-pub struct BlackVolatilityCurveBuilder<I>
+pub struct BlackVolatilityCurveBuilder<I, D>
 where
     I: Interpolator<DateTime, Volatility>,
+    D: DayCounter,
 {
     interpolator: I,
     reference_date: Option<DateTime>,
+    day_count_convention: Option<D>,
 }
 
-impl<I> BlackVolatilityCurveBuilder<I>
+impl<I, D> BlackVolatilityCurveBuilder<I, D>
 where
     I: Interpolator<DateTime, Volatility>,
+    D: DayCounter,
 {
     /// Add a point to the volatility curve.
     pub fn add_point(&mut self, point: (DateTime, Volatility)) -> &mut Self {
@@ -56,15 +64,24 @@ where
         self
     }
 
+    pub fn day_count_convention(&mut self, day_count_convention: D) -> &mut Self {
+        self.day_count_convention = Some(day_count_convention);
+        self
+    }
+
     /// Build the volatility curve.
-    pub fn build(mut self) -> BlackVolatilityCurve<I> {
+    pub fn build(mut self) -> BlackVolatilityCurve<I, D> {
         if self.reference_date.is_none() {
             self.reference_date = Some(DateTime::now());
+        }
+        if self.day_count_convention.is_none() {
+            self.day_count_convention = Some(D::default());
         }
         BlackVolatilityCurve {
             interpolator: self.interpolator,
             // Safe to unwrap, because we gave default value above.
             reference_date: self.reference_date.unwrap(),
+            day_counter: self.day_count_convention.unwrap(),
         }
     }
 }
@@ -73,7 +90,7 @@ where
 //  Trait implementations
 //  ------------------------------------------------------------------------------------------------
 
-impl<D, I> TermStructure<D> for BlackVolatilityCurve<I>
+impl<D, I> TermStructure<D> for BlackVolatilityCurve<I, D>
 where
     D: DayCounter,
     I: Interpolator<DateTime, Volatility>,
@@ -86,13 +103,17 @@ where
         self.interpolator.range().unwrap().1
     }
 
+    fn get_day_counter(&self) -> D {
+        self.day_counter
+    }
+
     fn is_datetime_valid(&self, dt: DateTime) -> bool {
         dt >= <Self as TermStructure<D>>::get_reference_date(self)
             && dt <= <Self as TermStructure<D>>::get_max_datetime(self)
     }
 }
 
-impl<D, I> VolatilityTermStructure<D> for BlackVolatilityCurve<I>
+impl<D, I> VolatilityTermStructure<D> for BlackVolatilityCurve<I, D>
 where
     D: DayCounter,
     I: Interpolator<DateTime, Volatility>,
@@ -106,21 +127,31 @@ where
     }
 }
 
-impl<D, I> BlackVolatilityTermStructure<D> for BlackVolatilityCurve<I>
+impl<D, I> BlackVolatilityTermStructure<D> for BlackVolatilityCurve<I, D>
 where
     D: DayCounter,
     I: Interpolator<DateTime, Volatility>,
 {
-    fn black_volatility(&self, maturity: DateTime, strike: Strike) -> Volatility {
-        todo!()
+    fn black_volatility(
+        &self,
+        maturity: DateTime,
+        _strike: Strike,
+    ) -> BlackVolatilityTermStructureResult {
+        use BlackVolatilityTermStructureResult::*;
+        match self.interpolator.interpolate(maturity) {
+            InterpolationResult::ExistingValue(v) => ExistingValue(v),
+            InterpolationResult::InterpolatedValue(v) => InterpolatedValue(v),
+            InterpolationResult::OutOfRange => OutOfRange,
+            InterpolationResult::NoPoints => NoPoints,
+        }
     }
 
     fn black_forward_volatility(
         &self,
-        start_date: DateTime,
-        end_date: DateTime,
-        strike: Strike,
-    ) -> Volatility {
+        _start_date: DateTime,
+        _end_date: DateTime,
+        _strike: Strike,
+    ) -> BlackVolatilityTermStructureResult {
         todo!()
     }
 }

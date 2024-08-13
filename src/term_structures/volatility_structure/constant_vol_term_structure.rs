@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use day_count_conventions::DayCounter;
 use derive_builder::{Builder, UninitializedFieldError};
 use num::Bounded;
@@ -11,6 +13,8 @@ use crate::term_structures::TermStructureStrikeValidity;
 use crate::time::DateTime;
 use crate::types::{Strike, Volatility};
 
+use super::black_volatility_term_structure::BlackVolatilityTermStructureResult;
+
 //  ------------------------------------------------------------------------------------------------
 //  Definition
 //  ------------------------------------------------------------------------------------------------
@@ -20,19 +24,28 @@ use crate::types::{Strike, Volatility};
     validate = "Self::validate",
     error = "ConstantVolTermStructureBuilderError"
 ))]
-pub struct ConstantVolTermStructure {
+pub struct ConstantVolTermStructure<D>
+where
+    D: DayCounter,
+{
     #[builder(setter(into))]
     volatility: Volatility,
 
     #[builder(default = "DateTime::now()")]
     reference_date: DateTime,
+
+    #[builder(default = "D::default()")]
+    day_count_convention: D,
 }
 
 //  ------------------------------------------------------------------------------------------------
 //  Builder
 //  ------------------------------------------------------------------------------------------------
 
-impl ConstantVolTermStructureBuilder {
+impl<D> ConstantVolTermStructureBuilder<D>
+where
+    D: DayCounter,
+{
     fn validate(&self) -> Result<(), ConstantVolTermStructureBuilderError> {
         // Check if volatility is negative.
         if let Some(vol) = self.volatility {
@@ -59,7 +72,7 @@ impl From<UninitializedFieldError> for ConstantVolTermStructureBuilderError {
 //  Trait implementations
 //  ------------------------------------------------------------------------------------------------
 
-impl<D> TermStructure<D> for ConstantVolTermStructure
+impl<D> TermStructure<D> for ConstantVolTermStructure<D>
 where
     D: DayCounter,
 {
@@ -74,9 +87,13 @@ where
     fn is_datetime_valid(&self, dt: DateTime) -> bool {
         dt >= self.reference_date
     }
+
+    fn get_day_counter(&self) -> D {
+        self.day_count_convention
+    }
 }
 
-impl<D> VolatilityTermStructure<D> for ConstantVolTermStructure
+impl<D> VolatilityTermStructure<D> for ConstantVolTermStructure<D>
 where
     D: DayCounter,
 {
@@ -89,12 +106,16 @@ where
     }
 }
 
-impl<D> BlackVolatilityTermStructure<D> for ConstantVolTermStructure
+impl<D> BlackVolatilityTermStructure<D> for ConstantVolTermStructure<D>
 where
     D: DayCounter,
 {
-    fn black_volatility(&self, _maturity: DateTime, _strike: Strike) -> Volatility {
-        self.volatility
+    fn black_volatility(
+        &self,
+        _maturity: DateTime,
+        _strike: Strike,
+    ) -> BlackVolatilityTermStructureResult {
+        BlackVolatilityTermStructureResult::ExistingValue(self.volatility)
     }
 
     fn black_forward_volatility(
@@ -102,7 +123,7 @@ where
         _start_date: DateTime,
         _end_date: DateTime,
         _strike: Strike,
-    ) -> Volatility {
-        self.volatility
+    ) -> BlackVolatilityTermStructureResult {
+        BlackVolatilityTermStructureResult::ExistingValue(self.volatility)
     }
 }

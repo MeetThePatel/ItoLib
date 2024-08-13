@@ -8,6 +8,7 @@ use itolib::{
     },
     interest_rate::InterestRate,
     money::{currency::USD, Money},
+    pricers::{AnalyticBlackScholesMerton, Pricer},
     term_structures::{
         volatility_structure::constant_vol_term_structure::ConstantVolTermStructureBuilder,
         yield_structure::flat_forward_term_structure::FlatForwardTermStructureBuilder,
@@ -16,12 +17,14 @@ use itolib::{
 };
 
 fn main() {
-    let strike_price: Money<USD> = Money::new(105.0);
+    let underlying_spot_price: Money<USD> = Money::new(100.0);
+
+    let strike_price = Money::new(105.0);
     let spot_rate: InterestRate<USD, Thirty360> =
-        InterestRate::new(0.02, Thirty360, Compounding::Continuous);
+        InterestRate::new(0.1, Thirty360, Compounding::Continuous);
 
     let payoff = VanillaPayoff::new(strike_price, OptionType::CALL);
-    let exercise = EuropeanExercise::new(DateTime::new_from_ymd(2024, 9, 1));
+    let exercise = EuropeanExercise::new(DateTime::new_from_ymd(2025, 1, 1));
 
     let call = EuropeanOption::new(payoff, exercise);
 
@@ -36,4 +39,9 @@ fn main() {
         .rate(spot_rate)
         .build()
         .unwrap();
+
+    let bsm_pricer =
+        AnalyticBlackScholesMerton::new(underlying_spot_price, &vol_curve, &yield_curve);
+
+    println!("{}", bsm_pricer.price(call));
 }

@@ -37,6 +37,10 @@ where
     fn is_datetime_valid(&self, dt: DateTime) -> bool {
         dt >= self.reference_date && dt <= self.get_max_datetime()
     }
+
+    fn get_day_counter(&self) -> D {
+        self.rate.get_day_counter()
+    }
 }
 
 impl<C, D> YieldTermStructure<C, D> for FlatForwardTermStructure<C, D>

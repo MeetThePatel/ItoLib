@@ -53,6 +53,10 @@ where
 {
     type PayoffNumberType = Money<C>;
 
+    fn get_strike(&self) -> Self::PayoffNumberType {
+        self.strike
+    }
+
     fn apply(&self, price: Self::PayoffNumberType) -> Self::PayoffNumberType {
         match self.option_type {
             OptionType::CALL => {

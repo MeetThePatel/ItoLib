@@ -9,6 +9,8 @@ pub trait Payoff: std::fmt::Display {
     // However, in the future, other option types will be implemented, such as percentage strikes.
     type PayoffNumberType;
 
+    fn get_strike(&self) -> Self::PayoffNumberType;
+
     fn apply(&self, price: Self::PayoffNumberType) -> Self::PayoffNumberType;
 }
 

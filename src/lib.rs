@@ -1,5 +1,4 @@
 #![warn(clippy::all)]
-#![allow(clippy::module_name_repetitions)]
 
 pub mod instruments;
 pub mod money;
@@ -16,3 +15,8 @@ pub mod time;
 pub mod types;
 
 pub mod math;
+
+pub mod pricers;
+
+// TODO: Incorporate https://docs.rs/assert_float_eq/latest/assert_float_eq/ to get coverage for
+// float comparisons.
