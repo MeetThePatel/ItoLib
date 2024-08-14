@@ -9,10 +9,7 @@ use crate::{
     money::{Currency, Money},
     pricers::Pricer,
     term_structures::{
-        volatility_structure::{
-            black_volatility_term_structure::BlackVolatilityTermStructureResult,
-            BlackVolatilityTermStructure,
-        },
+        volatility_structure::{BlackVolatilityTermStructure, BlackVolatilityTermStructureResult},
         yield_structure::YieldTermStructure,
     },
 };

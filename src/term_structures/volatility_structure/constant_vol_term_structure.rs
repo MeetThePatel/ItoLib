@@ -1,5 +1,4 @@
 use day_count_conventions::DayCounter;
-use derive_builder::{Builder, UninitializedFieldError};
 use num::Bounded;
 use ordered_float::OrderedFloat;
 
@@ -17,53 +16,85 @@ use super::black_volatility_term_structure::BlackVolatilityTermStructureResult;
 //  Definition
 //  ------------------------------------------------------------------------------------------------
 
-#[derive(Builder)]
-#[builder(build_fn(
-    validate = "Self::validate",
-    error = "ConstantVolTermStructureBuilderError"
-))]
 pub struct ConstantVolTermStructure<D>
 where
     D: DayCounter,
 {
-    #[builder(setter(into))]
     volatility: Volatility,
 
-    #[builder(default = "DateTime::now()")]
     reference_date: DateTime,
 
-    #[builder(default = "D::default()")]
     day_count_convention: D,
 }
 
-//  ------------------------------------------------------------------------------------------------
-//  Builder
-//  ------------------------------------------------------------------------------------------------
+#[derive(Debug)]
+pub struct ConstantVolTermStructureBuilder<D>
+where
+    D: DayCounter,
+{
+    volatility: Option<Volatility>,
+    reference_date: Option<DateTime>,
+    day_count_convention: Option<D>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum ConstantVolTermStructureBuilderError {
+    NoVolatilityProvided,
+    NegativeVolatility,
+}
 
 impl<D> ConstantVolTermStructureBuilder<D>
 where
     D: DayCounter,
 {
-    fn validate(&self) -> Result<(), ConstantVolTermStructureBuilderError> {
-        // Check if volatility is negative.
-        if let Some(vol) = self.volatility {
-            if vol < OrderedFloat(0.0) {
-                return Err(ConstantVolTermStructureBuilderError::NegativeVolatility);
-            }
+    pub fn new() -> Self {
+        Self {
+            volatility: None,
+            reference_date: None,
+            day_count_convention: None,
         }
-        Ok(())
+    }
+
+    pub fn volatility(&mut self, volatility: impl Into<Volatility>) -> &mut Self {
+        self.volatility = Some(volatility.into());
+        self
+    }
+
+    pub fn reference_date(&mut self, reference_date: DateTime) -> &mut Self {
+        self.reference_date = Some(reference_date);
+        self
+    }
+
+    pub fn day_count_convention(&mut self, day_count_convention: D) -> &mut Self {
+        self.day_count_convention = Some(day_count_convention);
+        self
+    }
+
+    pub fn build(
+        &self,
+    ) -> Result<ConstantVolTermStructure<D>, ConstantVolTermStructureBuilderError> {
+        if let Some(volatility) = self.volatility {
+            if volatility < OrderedFloat(0.0) {
+                Err(ConstantVolTermStructureBuilderError::NegativeVolatility)
+            } else {
+                Ok(ConstantVolTermStructure {
+                    volatility,
+                    reference_date: self.reference_date.unwrap_or(DateTime::now()),
+                    day_count_convention: self.day_count_convention.unwrap_or_default(),
+                })
+            }
+        } else {
+            Err(ConstantVolTermStructureBuilderError::NoVolatilityProvided)
+        }
     }
 }
 
-#[allow(clippy::module_name_repetitions)]
-#[derive(Debug)]
-pub enum ConstantVolTermStructureBuilderError {
-    NoVolatilityProvided,
-    NegativeVolatility,
-}
-impl From<UninitializedFieldError> for ConstantVolTermStructureBuilderError {
-    fn from(_value: UninitializedFieldError) -> Self {
-        Self::NoVolatilityProvided
+impl<D> Default for ConstantVolTermStructureBuilder<D>
+where
+    D: DayCounter,
+{
+    fn default() -> Self {
+        Self::new()
     }
 }
 

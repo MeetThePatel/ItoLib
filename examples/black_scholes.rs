@@ -10,8 +10,8 @@ use itolib::{
     money::{currency::USD, Money},
     pricers::{AnalyticBlackScholesMerton, Pricer},
     term_structures::{
-        volatility_structure::constant_vol_term_structure::ConstantVolTermStructureBuilder,
-        yield_structure::flat_forward_term_structure::FlatForwardTermStructureBuilder,
+        volatility_structure::ConstantVolTermStructureBuilder,
+        yield_structure::FlatForwardTermStructureBuilder,
     },
     time::DateTime,
 };
@@ -28,13 +28,13 @@ fn main() {
 
     let call = EuropeanOption::new(payoff, exercise);
 
-    let vol_curve = ConstantVolTermStructureBuilder::default()
+    let vol_curve = ConstantVolTermStructureBuilder::new()
         .reference_date(DateTime::now())
         .volatility(0.05)
         .build()
         .unwrap();
 
-    let yield_curve = FlatForwardTermStructureBuilder::default()
+    let yield_curve = FlatForwardTermStructureBuilder::new()
         .reference_date(DateTime::now())
         .rate(spot_rate)
         .build()

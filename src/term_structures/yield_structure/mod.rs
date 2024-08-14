@@ -25,5 +25,7 @@ where
     ) -> Result<InterestRate<C, D>, TermStructureError>;
 }
 
-pub mod flat_forward_term_structure;
-pub use flat_forward_term_structure::FlatForwardTermStructure;
+mod flat_forward_term_structure;
+pub use flat_forward_term_structure::{
+    FlatForwardTermStructure, FlatForwardTermStructureBuilder, FlatForwardTermStructureBuilderError,
+};

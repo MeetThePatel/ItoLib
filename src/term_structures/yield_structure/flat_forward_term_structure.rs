@@ -6,19 +6,77 @@ use crate::time::DateTime;
 use crate::types::DiscountFactor;
 
 use day_count_conventions::{DayCountFraction, DayCounter};
-use derive_builder::Builder;
 use ordered_float::OrderedFloat;
 
-#[derive(Builder)]
 pub struct FlatForwardTermStructure<C, D>
 where
     C: Currency,
     D: DayCounter,
 {
-    #[builder(default = "DateTime::now()")]
     pub reference_date: DateTime,
 
     pub rate: InterestRate<C, D>,
+}
+
+#[derive(Debug)]
+pub struct FlatForwardTermStructureBuilder<C, D>
+where
+    C: Currency,
+    D: DayCounter,
+{
+    reference_date: Option<DateTime>,
+
+    rate: Option<InterestRate<C, D>>,
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum FlatForwardTermStructureBuilderError {
+    NoRateProvided,
+}
+
+impl<C, D> FlatForwardTermStructureBuilder<C, D>
+where
+    C: Currency,
+    D: DayCounter,
+{
+    pub fn new() -> Self {
+        Self {
+            reference_date: None,
+            rate: None,
+        }
+    }
+
+    pub fn reference_date(&mut self, reference_date: DateTime) -> &mut Self {
+        self.reference_date = Some(reference_date);
+        self
+    }
+
+    pub fn rate(&mut self, rate: InterestRate<C, D>) -> &mut Self {
+        self.rate = Some(rate);
+        self
+    }
+
+    pub fn build(
+        &self,
+    ) -> Result<FlatForwardTermStructure<C, D>, FlatForwardTermStructureBuilderError> {
+        if self.rate.is_none() {
+            return Err(FlatForwardTermStructureBuilderError::NoRateProvided);
+        }
+        Ok(FlatForwardTermStructure {
+            reference_date: self.reference_date.unwrap_or(DateTime::now()),
+            rate: self.rate.unwrap(),
+        })
+    }
+}
+
+impl<C, D> Default for FlatForwardTermStructureBuilder<C, D>
+where
+    C: Currency,
+    D: DayCounter,
+{
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<C, D> TermStructure<D> for FlatForwardTermStructure<C, D>
