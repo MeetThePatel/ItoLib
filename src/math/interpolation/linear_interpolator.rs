@@ -159,6 +159,17 @@ mod tests {
 
     #[test]
     fn test_linear_interpolator() {
+        let interpolator: LinearInterpolator<OrderedFloat<f64>, OrderedFloat<f64>> =
+            LinearInterpolator::new();
+        assert_eq!(
+            interpolator.interpolate(OrderedFloat(1.0)),
+            InterpolationResult::NoPoints
+        );
+
+        let interpolator: LinearInterpolator<OrderedFloat<f64>, OrderedFloat<f64>> =
+            LinearInterpolator::default();
+        assert_eq!(interpolator.range(), None);
+
         let data: Vec<(OrderedFloat<f64>, OrderedFloat<f64>)> = vec![
             (OrderedFloat(1.0), OrderedFloat(10.0)),
             (OrderedFloat(2.0), OrderedFloat(20.0)),

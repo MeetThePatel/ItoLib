@@ -86,6 +86,7 @@ mod tests {
 
         assert_eq!(call.to_string(), "2024/07/27 $ 30.00 C (E)");
         assert_eq!(put.to_string(), "2024/07/27 $ 30.00 P (E)");
+        assert_eq!(call.get_strike(), strike_price);
         assert_eq!(call.get_payoff().to_string(), "$ 30.00 CALL");
         assert_eq!(
             call.get_exercise().get_dates(),

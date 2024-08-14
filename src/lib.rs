@@ -1,18 +1,25 @@
 #![warn(clippy::all)]
 
 pub mod instruments;
+
 pub mod money;
+// pub use money::{currency, Currency, ExchangeRate, Money};
 
 #[macro_use]
 pub(crate) mod macros;
 
 pub mod interest_rate;
+pub use interest_rate::{implied_rate_from_compound_factor, InterestRate};
+
 pub mod term_structures;
 
 pub mod compounding;
+pub use compounding::Compounding;
+
 pub mod time;
 
 pub mod types;
+pub use types::{CompoundFactor, DiscountFactor, MonetaryNumber, Percentage, Strike, Volatility};
 
 pub mod math;
 
