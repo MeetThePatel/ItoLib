@@ -174,14 +174,17 @@ impl<'a> Display for ExchangeRateManager<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::assert_approx_equal_f64;
-    use crate::macros::assert_approx_equal_Money;
-    use crate::money::{
-        currency::{EUR, GBP, JPY, USD},
-        ExchangeRate, ExchangeRateManagerError, Money,
+    use assert_approx_eq::assert_approx_eq;
+
+    use crate::{
+        macros::assert_approx_equal_money,
+        money::{
+            currency::{EUR, GBP, JPY, USD},
+            ExchangeRate, ExchangeRateManagerError, Money,
+        },
     };
 
-    use super::ExchangeRateManager;
+    use crate::money::ExchangeRateManager;
 
     #[test]
     fn test_exchange_rate_manager_operations() {
@@ -213,12 +216,13 @@ mod tests {
 
         // Test get.
         let rate = manager.get(&GBP::default(), &USD::default()).unwrap();
-        assert_approx_equal_f64!(rate.rate, 1.28510, 10e-8);
+        // assert_approx_equal_f64!(rate.rate, 1.28510, 10e-8);
+        assert_approx_eq!(rate.rate, 1.28510, 10e-8);
 
         // Test convert to base.
         let m1: Money<USD> = Money::new(1.0);
         let expected: Money<GBP> = Money::new(0.778_149_56);
-        assert_approx_equal_Money!(
+        assert_approx_equal_money!(
             manager.convert(&m1, &GBP::default()).unwrap(),
             expected,
             10e-7
@@ -227,7 +231,7 @@ mod tests {
         // Test convert to quote.
         let m2: Money<GBP> = Money::new(1.0);
         let expected: Money<USD> = Money::new(1.28510);
-        assert_approx_equal_Money!(
+        assert_approx_equal_money!(
             manager.convert(&m2, &USD::default()).unwrap(),
             expected,
             10e-7
@@ -237,11 +241,13 @@ mod tests {
         let gbpusd: ExchangeRate<GBP, USD> = ExchangeRate::new(1.28512);
         manager.update(&gbpusd);
         let rate = manager.get(&GBP::default(), &USD::default()).unwrap();
-        assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
+        // assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
+        assert_approx_eq!(rate.rate, 1.28512_f64, 10e-8);
 
         // Test remove.
         let rate = manager.remove(&GBP::default(), &USD::default()).unwrap();
-        assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
+        // assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
+        assert_approx_eq!(rate.rate, 1.28512_f64, 10e-8);
 
         // Test clear.
         manager.clear();

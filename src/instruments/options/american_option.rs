@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::instruments::exercises::{AmericanExercise, Exercise};
 use crate::instruments::options::{Option, OptionType};
-use crate::instruments::payoffs::{CallPutPayoff, Payoff, VanillaPayoff};
+use crate::instruments::payoffs::{Payoff, StrikedPayoff, VanillaPayoff};
 use crate::money::Currency;
 
 pub struct AmericanOption<C>

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::instruments::exercises::{EuropeanExercise, Exercise};
 use crate::instruments::options::{Option, OptionType};
-use crate::instruments::payoffs::{CallPutPayoff, Payoff, VanillaPayoff};
+use crate::instruments::payoffs::{Payoff, StrikedPayoff, VanillaPayoff};
 use crate::money::{Currency, Money};
 
 pub struct EuropeanOption<C>
@@ -23,7 +23,7 @@ where
     }
 
     #[must_use]
-    pub const fn get_strike(&self) -> Money<C> {
+    pub fn get_strike(&self) -> Money<C> {
         self.payoff.get_strike()
     }
 }

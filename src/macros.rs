@@ -1,60 +1,13 @@
-#[macro_export]
-macro_rules! assert_approx_equal_f64 {
+#[allow(unused_macros)]
+macro_rules! assert_approx_equal_money {
     ($x:expr, $y:expr, $d:expr) => {
-        assert!(
-            ((ordered_float::OrderedFloat::<f64>::from($x)
-                - ordered_float::OrderedFloat::<f64>::from($y))
-            .le(&ordered_float::OrderedFloat::<f64>::from($d)))
-                && ((ordered_float::OrderedFloat::<f64>::from($y)
-                    - ordered_float::OrderedFloat::<f64>::from($x))
-                .le(&ordered_float::OrderedFloat::<f64>::from($d))),
-            "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
-            $x,
-            $y,
-            $d
-        );
-    };
-}
-pub use assert_approx_equal_f64;
-
-#[macro_export]
-macro_rules! assert_approx_equal_f32 {
-    ($x:expr, $y:expr, $d:expr) => {
-        assert!(
-            (ordered_float::OrderedFloat::<f32>::from($x)
-                - ordered_float::OrderedFloat::<f32>::from($y))
-            .le(ordered_float::OrderedFloat::<f32>::from($d))
-                && ((ordered_float::OrderedFloat::<f32>::from($y)
-                    - ordered_float::OrderedFloat::<f32>::from($x))
-                .le(ordered_float::OrderedFloat::<f32>::from($d))),
-            "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
-            $x,
-            $y,
-            $d
-        );
-    };
-}
-pub use assert_approx_equal_f32;
-
-#[macro_export]
-macro_rules! assert_approx_equal_Money {
-    ($x:expr, $y:expr, $d:expr) => {
-        assert!(
-            ((ordered_float::OrderedFloat::<f64>::from(($x - $y).amount))
-                .le(&ordered_float::OrderedFloat::<f64>::from($d)))
-                && ((ordered_float::OrderedFloat::<f64>::from(($y - $x).amount))
-                    .le(&ordered_float::OrderedFloat::<f64>::from($d))),
-            "\nLeft: \t\t{}, \nRight: \t\t{}, \nPrecision: \t{}\n",
-            $x,
-            $y,
-            $d
-        );
         assert_eq!($x.get_currency_name(), $y.get_currency_name());
+        assert_approx_eq::assert_approx_eq!($x.amount, $y.amount, $d);
     };
 }
-pub use assert_approx_equal_Money;
+#[allow(unused_imports)]
+pub(crate) use assert_approx_equal_money;
 
-#[macro_export]
 macro_rules! any_true {
     () => {
         None
@@ -77,4 +30,4 @@ macro_rules! any_true {
         }
     };
 }
-pub use any_true;
+pub(crate) use any_true;

@@ -134,6 +134,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use assert_approx_eq::assert_approx_eq;
     use day_count_conventions::Actual365Fixed;
 
     use crate::{
@@ -213,19 +214,19 @@ mod tests {
             .unwrap();
 
         // Test Discount Factor
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure.discount_factor(ref_date).unwrap(),
             1.0,
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .discount_factor(ref_date_plus_1_year)
                 .unwrap(),
             0.955_879_62,
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .discount_factor(ref_date_plus_1_year_7_month)
                 .unwrap(),
@@ -251,12 +252,12 @@ mod tests {
             .unwrap();
 
         // Test Zero Rate
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure.zero_rate(ref_date).unwrap().get_rate(),
             flat_rate.get_rate(),
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .zero_rate(ref_date_plus_1_year)
                 .unwrap()
@@ -264,7 +265,7 @@ mod tests {
             flat_rate.get_rate(),
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .zero_rate(ref_date_plus_1_year_7_month)
                 .unwrap()
@@ -291,7 +292,7 @@ mod tests {
             .unwrap();
 
         // Test forward rate
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .forward_rate(ref_date, ref_date_plus_1_year)
                 .unwrap()
@@ -299,7 +300,7 @@ mod tests {
             flat_rate.get_rate(),
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .forward_rate(ref_date_plus_1_year, ref_date_plus_1_year_7_month)
                 .unwrap()
@@ -307,7 +308,7 @@ mod tests {
             flat_rate.get_rate(),
             10e-8
         );
-        assert_approx_equal_f64!(
+        assert_approx_eq!(
             term_structure
                 .forward_rate(ref_date, ref_date_plus_1_year_7_month)
                 .unwrap()

@@ -69,7 +69,7 @@ where
 #[cfg(test)]
 mod tests {
 
-    use crate::macros::assert_approx_equal_Money;
+    use crate::macros::assert_approx_equal_money;
     use crate::money::currency::{EUR, USD};
     use crate::money::Money;
 
@@ -80,8 +80,8 @@ mod tests {
         let m1: Money<USD> = Money::new(10.0);
         let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
-        let expected = Money::new(9.227_475_731_738_826);
-        assert_approx_equal_Money!(rate.convert_to_base(&m1), expected, 10e-8);
+        let expected: Money<EUR> = Money::new(9.227_475_731_738_826);
+        assert_approx_equal_money!(rate.convert_to_base(&m1), expected, 10e-8);
     }
 
     #[test]
@@ -89,8 +89,8 @@ mod tests {
         let m1: Money<EUR> = Money::new(10.0);
         let rate: ExchangeRate<EUR, USD> = ExchangeRate::new(1.08372);
 
-        let expected = Money::new(10.8372);
-        assert_approx_equal_Money!(rate.convert_to_quote(&m1), expected, 10e-8);
+        let expected: Money<USD> = Money::new(10.8372);
+        assert_approx_equal_money!(rate.convert_to_quote(&m1), expected, 10e-8);
     }
 
     #[test]

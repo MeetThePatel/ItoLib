@@ -4,7 +4,8 @@ use std::marker::PhantomData;
 use num::Zero;
 
 use crate::instruments::options::OptionType;
-use crate::instruments::payoffs::{CallPutPayoff, Payoff};
+use crate::instruments::payoffs::Payoff;
+use crate::instruments::payoffs::StrikedPayoff;
 use crate::money::{Currency, Money};
 
 #[derive(Debug, Copy, Clone)]
@@ -30,12 +31,6 @@ where
             currency: PhantomData,
         }
     }
-
-    #[must_use]
-    #[inline]
-    pub const fn get_strike(&self) -> Money<C> {
-        self.strike
-    }
 }
 
 impl<C> Display for VanillaPayoff<C>
@@ -52,10 +47,6 @@ where
     C: Currency,
 {
     type PayoffNumberType = Money<C>;
-
-    fn get_strike(&self) -> Self::PayoffNumberType {
-        self.strike
-    }
 
     fn apply(&self, price: Self::PayoffNumberType) -> Self::PayoffNumberType {
         match self.option_type {
@@ -77,10 +68,14 @@ where
     }
 }
 
-impl<C> CallPutPayoff<C> for VanillaPayoff<C>
+impl<C> StrikedPayoff for VanillaPayoff<C>
 where
     C: Currency,
 {
+    fn get_strike(&self) -> Self::PayoffNumberType {
+        self.strike
+    }
+
     fn get_option_type(&self) -> OptionType {
         self.option_type
     }
@@ -91,7 +86,7 @@ mod tests {
     use crate::{
         instruments::{
             options::OptionType,
-            payoffs::{CallPutPayoff, Payoff},
+            payoffs::{Payoff, StrikedPayoff},
         },
         money::{currency::USD, Money},
     };

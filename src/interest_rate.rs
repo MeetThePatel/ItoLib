@@ -164,6 +164,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use assert_approx_eq::assert_approx_eq;
     use day_count_conventions::Actual360;
 
     use super::*;
@@ -200,13 +201,13 @@ mod tests {
         );
         let dcf1 = DayCountFraction::new(1.0);
         // Discount Factor
-        assert_approx_equal_f64!(simple_rate.discount_factor(&dcf1), 0.952_380_95, 10e-8);
-        assert_approx_equal_f64!(compound_rate.discount_factor(&dcf1), 0.951_524_27, 10e-8);
-        assert_approx_equal_f64!(continuous_rate.discount_factor(&dcf1), 0.951_229_42, 10e-8);
+        assert_approx_eq!(*simple_rate.discount_factor(&dcf1), 0.952_380_95, 10e-8);
+        assert_approx_eq!(*compound_rate.discount_factor(&dcf1), 0.951_524_27, 10e-8);
+        assert_approx_eq!(*continuous_rate.discount_factor(&dcf1), 0.951_229_42, 10e-8);
 
         // Implied Interest Rate from Compound Factor
-        assert_approx_equal_f64!(
-            implied_rate_from_compound_factor::<USD, _>(
+        assert_approx_eq!(
+            *implied_rate_from_compound_factor::<USD, _>(
                 1.5,
                 &dcf1,
                 Actual360,
@@ -217,8 +218,8 @@ mod tests {
             0.5,
             10e-8
         );
-        assert_approx_equal_f64!(
-            implied_rate_from_compound_factor::<USD, Actual360>(
+        assert_approx_eq!(
+            *implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
                 &DayCountFraction::new(1.0),
                 Actual360,
@@ -229,8 +230,8 @@ mod tests {
             0.426_727_67,
             10e-8
         );
-        assert_approx_equal_f64!(
-            implied_rate_from_compound_factor::<USD, Actual360>(
+        assert_approx_eq!(
+            *implied_rate_from_compound_factor::<USD, Actual360>(
                 1.5,
                 &DayCountFraction::new(1.0),
                 Actual360,

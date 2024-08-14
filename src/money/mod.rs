@@ -215,7 +215,7 @@ mod tests {
     #[cfg(test)]
     mod arithmetic_operations {
         use crate::{
-            macros::assert_approx_equal_Money,
+            macros::assert_approx_equal_money,
             money::{currency::USD, Money},
         };
 
@@ -224,8 +224,8 @@ mod tests {
             let m1: Money<USD> = Money::new(5.0);
             let m2 = Money::new(6.3);
 
-            let expected = Money::new(11.3);
-            assert_approx_equal_Money!(m1 + m2, expected, 10e-8);
+            let expected: Money<USD> = Money::new(11.3);
+            assert_approx_equal_money!(m1 + m2, expected, 10e-8);
         }
 
         #[test]
@@ -233,24 +233,24 @@ mod tests {
             let m1: Money<USD> = Money::new(12.94);
             let m2 = Money::new(6.3);
 
-            let expected = Money::new(6.64);
-            assert_approx_equal_Money!(m1 - m2, expected, 10e-8);
+            let expected: Money<USD> = Money::new(6.64);
+            assert_approx_equal_money!(m1 - m2, expected, 10e-8);
         }
 
         #[test]
         fn test_money_mul_int() {
             let m: Money<USD> = Money::new(5.0);
 
-            let expected = Money::new(20.0);
-            assert_approx_equal_Money!(m * 4.0, expected, 10e-8);
+            let expected: Money<USD> = Money::new(20.0);
+            assert_approx_equal_money!(m * 4.0, expected, 10e-8);
         }
 
         #[test]
         fn test_money_mul_float() {
             let m: Money<USD> = Money::new(5.0);
 
-            let expected = Money::new(7.5);
-            assert_approx_equal_Money!(m * 1.5, expected, 10e-8);
+            let expected: Money<USD> = Money::new(7.5);
+            assert_approx_equal_money!(m * 1.5, expected, 10e-8);
         }
 
         #[test]
@@ -259,15 +259,15 @@ mod tests {
             let m2: Money<USD> = Money::new(6.0);
 
             let expected: Money<USD> = Money::new(1.0);
-            assert_approx_equal_Money!(m1 / m2, expected, 10e-8);
+            assert_approx_equal_money!(m1 / m2, expected, 10e-8);
         }
 
         #[test]
         fn test_money_div_float() {
             let m: Money<USD> = Money::new(6.0);
 
-            let expected = Money::new(2.0);
-            assert_approx_equal_Money!(m / 3.0, expected, 10e-8);
+            let expected: Money<USD> = Money::new(2.0);
+            assert_approx_equal_money!(m / 3.0, expected, 10e-8);
         }
     }
     #[test]
