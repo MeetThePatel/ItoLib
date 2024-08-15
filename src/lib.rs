@@ -1,4 +1,8 @@
 #![warn(clippy::all)]
+// #![warn(clippy::pedantic)]
+// #![warn(clippy::nursery)]
+// Clippy::Pedantic lint modifications
+#![allow(clippy::module_name_repetitions)]
 
 pub mod instruments;
 

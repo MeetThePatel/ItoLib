@@ -30,7 +30,8 @@ impl<'a> ExchangeRateManager<'a> {
     /// Inserts an exchange rate into the `ExchangeRateManager`.
     ///
     /// # Errors
-    /// Will return `AlreadyExists` if an exchange rate already exists between the provided currencies.
+    /// Will return `AlreadyExists` if an exchange rate already exists between the provided
+    /// currencies.
     pub fn insert<B, Q>(
         &mut self,
         rate: &ExchangeRate<B, Q>,
@@ -47,8 +48,8 @@ impl<'a> ExchangeRateManager<'a> {
             return Err(ExchangeRateManagerError::AlreadyExists);
         }
 
-        let base_code = base_currency.get_alphabetic_code();
-        let quote_code = quote_currency.get_alphabetic_code();
+        let base_code = base_currency.alphabetic_code();
+        let quote_code = quote_currency.alphabetic_code();
 
         self.exchange_rate_map
             .insert((base_code, quote_code), rate.rate);
@@ -58,7 +59,8 @@ impl<'a> ExchangeRateManager<'a> {
     /// Get the `ExchangeRate` between two currencies from the `ExchangeRateManager`.
     ///
     /// # Errors
-    /// Will return `ExchangeRateNotFound` if the exchange rate does not exist in the `ExchangeRateManager.`
+    /// Will return `ExchangeRateNotFound` if the exchange rate does not exist in the
+    /// `ExchangeRateManager.`
     pub fn get<B, Q>(
         &self,
         base: &B,
@@ -68,8 +70,8 @@ impl<'a> ExchangeRateManager<'a> {
         B: Currency,
         Q: Currency,
     {
-        let base_code = base.get_alphabetic_code();
-        let quote_code = quote.get_alphabetic_code();
+        let base_code = base.alphabetic_code();
+        let quote_code = quote.alphabetic_code();
         self.exchange_rate_map
             .get(&(base_code, quote_code))
             .map_or(Err(ExchangeRateManagerError::ExchangeRateNotFound), |a| {
@@ -82,8 +84,8 @@ impl<'a> ExchangeRateManager<'a> {
         B: Currency,
         Q: Currency,
     {
-        let base_code = base.get_alphabetic_code();
-        let quote_code = quote.get_alphabetic_code();
+        let base_code = base.alphabetic_code();
+        let quote_code = quote.alphabetic_code();
         match any_true!(
             self.exchange_rate_map
                 .contains_key(&(base_code, quote_code)),
@@ -101,8 +103,8 @@ impl<'a> ExchangeRateManager<'a> {
         B: Currency,
         Q: Currency,
     {
-        let base_code = rate.get_base_currency().get_alphabetic_code();
-        let quote_code = rate.get_quote_currency().get_alphabetic_code();
+        let base_code = rate.get_base_currency().alphabetic_code();
+        let quote_code = rate.get_quote_currency().alphabetic_code();
         self.exchange_rate_map
             .insert((base_code, quote_code), rate.rate)
             .map(ExchangeRate::new)
@@ -113,8 +115,8 @@ impl<'a> ExchangeRateManager<'a> {
         B: Currency,
         Q: Currency,
     {
-        let base_code = base.get_alphabetic_code();
-        let quote_code = quote.get_alphabetic_code();
+        let base_code = base.alphabetic_code();
+        let quote_code = quote.alphabetic_code();
         self.exchange_rate_map
             .remove(&(base_code, quote_code))
             .map(ExchangeRate::new)
@@ -131,7 +133,8 @@ impl<'a> ExchangeRateManager<'a> {
 
     /// Converts one currency to another using the rates in the `ExchangeRateManager`.
     ///
-    /// This method only supports using direct conversion. In the future, there will be support for finding an indirect quote.
+    /// This method only supports using direct conversion. In the future, there will be support for
+    /// finding an indirect quote.
     ///
     /// # Errors
     /// Will return `ExchangeRateNotFond` if there is no direct path from one currency to the other.

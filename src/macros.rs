@@ -1,7 +1,7 @@
 #[allow(unused_macros)]
 macro_rules! assert_approx_equal_money {
     ($x:expr, $y:expr, $d:expr) => {
-        assert_eq!($x.get_currency_name(), $y.get_currency_name());
+        assert_eq!($x.currency(), $y.currency());
         assert_approx_eq::assert_approx_eq!($x.amount, $y.amount, $d);
     };
 }

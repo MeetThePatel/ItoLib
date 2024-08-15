@@ -2,32 +2,32 @@ pub trait Currency: Default + Copy + Clone {
     /// Currency name.
     ///     e.g. United States Dollar
     #[must_use]
-    fn get_name(&self) -> &'static str;
+    fn name(&self) -> &'static str;
 
     /// Currency symbol.
     ///     e.g. $
     #[must_use]
-    fn get_symbol(&self) -> &'static str;
+    fn symbol(&self) -> &'static str;
 
     /// ISO 4217 currency code.
     ///     e.g. USD
     #[must_use]
-    fn get_alphabetic_code(&self) -> &'static str;
+    fn alphabetic_code(&self) -> &'static str;
 
     /// ISO 4217 currency number.
     ///     e.g. 840
     #[must_use]
-    fn get_numeric_code(&self) -> &'static str;
+    fn numeric_code(&self) -> &'static str;
 
     /// Minor units (digits after decimal places).
     ///     e.g. 2
     #[must_use]
-    fn get_minor(&self) -> usize;
+    fn minor(&self) -> usize;
 
     /// Fractions per unit.
     ///     e.g. 100
     #[must_use]
-    fn get_fractions(&self) -> u16;
+    fn fractions(&self) -> u16;
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -40,32 +40,32 @@ macro_rules! generate_currency {
         impl $crate::money::Currency for $identifier {
             #[must_use]
             #[inline]
-            fn get_name(&self) -> &'static str {
+            fn name(&self) -> &'static str {
                 $name
             }
             #[must_use]
             #[inline]
-            fn get_symbol(&self) -> &'static str {
+            fn symbol(&self) -> &'static str {
                 $symbol
             }
             #[must_use]
             #[inline]
-            fn get_alphabetic_code(&self) -> &'static str {
+            fn alphabetic_code(&self) -> &'static str {
                 $alphabetic_code
             }
             #[must_use]
             #[inline]
-            fn get_numeric_code(&self) -> &'static str {
+            fn numeric_code(&self) -> &'static str {
                 $numeric_code
             }
             #[must_use]
             #[inline]
-            fn get_minor(&self) -> usize {
+            fn minor(&self) -> usize {
                 $minor
             }
             #[must_use]
             #[inline]
-            fn get_fractions(&self) -> u16 {
+            fn fractions(&self) -> u16 {
                 $fractions
             }
         }
@@ -243,11 +243,11 @@ mod tests {
     fn test_currency() {
         let x = USD::default();
 
-        assert_eq!(x.get_name(), "United States Dollar");
-        assert_eq!(x.get_symbol(), "$");
-        assert_eq!(x.get_alphabetic_code(), "USD");
-        assert_eq!(x.get_numeric_code(), "840");
-        assert_eq!(x.get_minor(), 2);
-        assert_eq!(x.get_fractions(), 100);
+        assert_eq!(x.name(), "United States Dollar");
+        assert_eq!(x.symbol(), "$");
+        assert_eq!(x.alphabetic_code(), "USD");
+        assert_eq!(x.numeric_code(), "840");
+        assert_eq!(x.minor(), 2);
+        assert_eq!(x.fractions(), 100);
     }
 }

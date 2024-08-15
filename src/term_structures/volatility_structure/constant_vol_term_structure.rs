@@ -47,7 +47,8 @@ impl<D> ConstantVolTermStructureBuilder<D>
 where
     D: DayCounter,
 {
-    pub fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             volatility: None,
             reference_date: None,
@@ -73,19 +74,20 @@ where
     pub fn build(
         &self,
     ) -> Result<ConstantVolTermStructure<D>, ConstantVolTermStructureBuilderError> {
-        if let Some(volatility) = self.volatility {
-            if volatility < OrderedFloat(0.0) {
-                Err(ConstantVolTermStructureBuilderError::NegativeVolatility)
-            } else {
-                Ok(ConstantVolTermStructure {
-                    volatility,
-                    reference_date: self.reference_date.unwrap_or(DateTime::now()),
-                    day_count_convention: self.day_count_convention.unwrap_or_default(),
-                })
-            }
-        } else {
-            Err(ConstantVolTermStructureBuilderError::NoVolatilityProvided)
-        }
+        self.volatility.map_or(
+            Err(ConstantVolTermStructureBuilderError::NoVolatilityProvided),
+            |volatility| {
+                if volatility < OrderedFloat(0.0) {
+                    Err(ConstantVolTermStructureBuilderError::NegativeVolatility)
+                } else {
+                    Ok(ConstantVolTermStructure {
+                        volatility,
+                        reference_date: self.reference_date.unwrap_or_else(DateTime::now),
+                        day_count_convention: self.day_count_convention.unwrap_or_default(),
+                    })
+                }
+            },
+        )
     }
 }
 

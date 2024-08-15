@@ -1,4 +1,5 @@
 use day_count_conventions::DayCounter;
+use num::Float;
 use statrs::distribution::{ContinuousCDF, Normal};
 
 use crate::{
@@ -79,7 +80,7 @@ where
             .day_count_fraction(&self.volatility_curve.get_reference_date(), &t)
             .get_fraction();
         let d_plus =
-            (0.5 * *sigma * *sigma).mul_add(tau, (f / k).amount.ln()) / *(sigma * tau.sqrt());
+            (0.5 * *sigma * *sigma).mul_add(tau, *(f / k).ln().amount()) / *(sigma * tau.sqrt());
         let d_minus = (*sigma).mul_add(-tau.sqrt(), d_plus);
 
         let norm = Normal::standard();
@@ -87,13 +88,13 @@ where
             OptionType::CALL => {
                 let call_price = d * norm
                     .cdf(d_plus)
-                    .mul_add(*f.amount, -(norm.cdf(d_minus) * *k.amount));
+                    .mul_add(*f.amount(), -(norm.cdf(d_minus) * *k.amount()));
                 Money::new(call_price)
             }
             OptionType::PUT => {
                 let put_price = d * norm
                     .cdf(-1.0 * d_minus)
-                    .mul_add(*k.amount, -(norm.cdf(-1.0 * d_plus) * *f.amount));
+                    .mul_add(*k.amount(), -(norm.cdf(-1.0 * d_plus) * *f.amount()));
                 Money::new(put_price)
             }
         }

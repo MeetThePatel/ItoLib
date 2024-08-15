@@ -60,8 +60,8 @@ where
             f,
             "{} {}/{}",
             self.rate,
-            self.get_base_currency().get_alphabetic_code(),
-            self.get_quote_currency().get_alphabetic_code()
+            self.get_base_currency().alphabetic_code(),
+            self.get_quote_currency().alphabetic_code()
         )
     }
 }

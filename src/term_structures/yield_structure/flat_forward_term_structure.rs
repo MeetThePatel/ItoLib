@@ -39,7 +39,8 @@ where
     C: Currency,
     D: DayCounter,
 {
-    pub fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             reference_date: None,
             rate: None,
@@ -63,7 +64,7 @@ where
             return Err(FlatForwardTermStructureBuilderError::NoRateProvided);
         }
         Ok(FlatForwardTermStructure {
-            reference_date: self.reference_date.unwrap_or(DateTime::now()),
+            reference_date: self.reference_date.unwrap_or_else(DateTime::now),
             rate: self.rate.unwrap(),
         })
     }
