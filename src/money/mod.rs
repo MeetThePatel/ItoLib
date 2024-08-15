@@ -76,7 +76,7 @@ impl<C: Currency> Money<C> {
     /// # use itolib::money::Money;
     /// # use itolib::money::currency::USD;
     /// let x: Money<USD> = Money::new(1.0);
-    /// assert_eq!(x.get_currency(), USD::default());
+    /// assert_eq!(x.currency(), USD::default());
     /// ```
     #[must_use]
     #[inline]
