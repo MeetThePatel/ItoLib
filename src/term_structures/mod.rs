@@ -1,5 +1,15 @@
-pub mod volatility_structure;
-pub mod yield_structure;
+mod volatility_structure;
+pub use volatility_structure::{
+    BlackVolatilityCurve, BlackVolatilityCurveBuilder, BlackVolatilityTermStructure,
+    BlackVolatilityTermStructureResult, ConstantVolTermStructure, ConstantVolTermStructureBuilder,
+    ConstantVolTermStructureBuilderError,
+};
+
+mod yield_structure;
+pub use yield_structure::{
+    FlatForwardTermStructure, FlatForwardTermStructureBuilder,
+    FlatForwardTermStructureBuilderError, YieldTermStructure,
+};
 
 use day_count_conventions::DayCounter;
 
@@ -30,7 +40,8 @@ where
 
     /// Ensure that the term structure is applicable to the date.
     ///
-    /// This is a utility method that makes sure that the term structure can make predictions about a given date.
+    /// This is a utility method that makes sure that the term structure can make predictions about
+    /// a given date.
     fn is_datetime_valid(&self, dt: DateTime) -> bool;
 }
 

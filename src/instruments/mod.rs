@@ -1,8 +1,11 @@
 pub mod instrument;
 pub use instrument::Instrument;
 
-pub mod options;
+mod options;
+pub use options::{AmericanOption, EuropeanOption, Option, OptionType};
 
-pub mod exercises;
+mod exercises;
+pub use exercises::{AmericanExercise, EuropeanExercise, Exercise};
 
-pub mod payoffs;
+mod payoffs;
+pub use payoffs::{Payoff, StrikedPayoff, VanillaPayoff};

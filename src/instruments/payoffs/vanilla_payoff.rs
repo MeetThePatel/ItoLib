@@ -88,7 +88,8 @@ mod tests {
             options::OptionType,
             payoffs::{Payoff, StrikedPayoff},
         },
-        money::{currency::USD, Money},
+        money::currency::USD,
+        Money,
     };
 
     use super::VanillaPayoff;

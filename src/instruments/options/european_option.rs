@@ -5,6 +5,7 @@ use crate::instruments::options::{Option, OptionType};
 use crate::instruments::payoffs::{Payoff, StrikedPayoff, VanillaPayoff};
 use crate::money::{Currency, Money};
 
+#[derive(Debug, Copy, Clone)]
 pub struct EuropeanOption<C>
 where
     C: Currency,

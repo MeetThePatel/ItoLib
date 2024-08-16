@@ -1,22 +1,21 @@
 use day_count_conventions::Thirty360;
+
 use itolib::{
-    compounding::Compounding,
-    instruments::{
-        exercises::EuropeanExercise,
-        options::{EuropeanOption, OptionType},
-        payoffs::VanillaPayoff,
-    },
-    interest_rate::InterestRate,
-    money::{currency::USD, Money},
+    currency::USD,
+    instruments::{EuropeanExercise, EuropeanOption, OptionType, VanillaPayoff},
     pricers::{AnalyticBlackScholesMerton, Pricer},
-    term_structures::{
-        volatility_structure::ConstantVolTermStructureBuilder,
-        yield_structure::FlatForwardTermStructureBuilder,
-    },
-    time::DateTime,
+    term_structures::{ConstantVolTermStructureBuilder, FlatForwardTermStructureBuilder},
+    time::{DateTime, Duration},
+    Compounding, InterestRate, Money,
 };
 
 fn main() {
+    let mut exercises = Vec::new();
+    for i in 1..=12 {
+        let tmp = EuropeanExercise::new(DateTime::now() + Duration::new_from_days(30.0) * i);
+        exercises.push(tmp);
+    }
+
     let underlying_spot_price: Money<USD> = Money::new(100.0);
 
     let strike_price = Money::new(105.0);
@@ -24,9 +23,12 @@ fn main() {
         InterestRate::new(0.1, Thirty360, Compounding::Continuous);
 
     let payoff = VanillaPayoff::new(strike_price, OptionType::CALL);
-    let exercise = EuropeanExercise::new(DateTime::new_from_ymd(2025, 1, 1));
 
-    let call = EuropeanOption::new(payoff, exercise);
+    let mut calls = Vec::new();
+    for exercise in exercises {
+        let tmp = EuropeanOption::new(payoff, exercise);
+        calls.push(tmp)
+    }
 
     let vol_curve = ConstantVolTermStructureBuilder::new()
         .reference_date(DateTime::now())
@@ -43,5 +45,5 @@ fn main() {
     let bsm_pricer =
         AnalyticBlackScholesMerton::new(underlying_spot_price, &vol_curve, &yield_curve);
 
-    println!("{}", bsm_pricer.price(call));
+    dbg!(bsm_pricer.price_vec(&calls));
 }

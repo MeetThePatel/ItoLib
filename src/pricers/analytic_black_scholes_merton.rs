@@ -3,15 +3,11 @@ use num::Float;
 use statrs::distribution::{ContinuousCDF, Normal};
 
 use crate::{
-    instruments::{
-        exercises::Exercise,
-        options::{EuropeanOption, Option, OptionType},
-    },
+    instruments::{EuropeanOption, Exercise, Option, OptionType},
     money::{Currency, Money},
     pricers::Pricer,
     term_structures::{
-        volatility_structure::{BlackVolatilityTermStructure, BlackVolatilityTermStructureResult},
-        yield_structure::YieldTermStructure,
+        YieldTermStructure, {BlackVolatilityTermStructure, BlackVolatilityTermStructureResult},
     },
 };
 
@@ -49,7 +45,7 @@ where
     D: DayCounter,
 {
     #[allow(clippy::many_single_char_names)]
-    fn price(&self, option: EuropeanOption<C>) -> Money<C> {
+    fn price(&self, option: &EuropeanOption<C>) -> Money<C> {
         use BlackVolatilityTermStructureResult::{
             ExistingValue, InterpolatedValue, NoPoints, OutOfRange,
         };
@@ -98,5 +94,9 @@ where
                 Money::new(put_price)
             }
         }
+    }
+
+    fn price_vec(&self, options: &[EuropeanOption<C>]) -> Vec<Money<C>> {
+        options.iter().map(|option| self.price(option)).collect()
     }
 }
