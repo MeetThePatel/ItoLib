@@ -13,3 +13,5 @@ ItoLib is library for quantitative finance in Rust with three main goals:
 - **Speed:** the library should be fast.
 
 Contributions are welcome!
+
+To get started, head on over to the [wiki](https://github.com/MeetThePatel/ItoLib/wiki)!
