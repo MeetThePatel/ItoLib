@@ -1,0 +1,20 @@
+[package]
+name = "itolib-term-structures"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+[dependencies]
+itolib-money.workspace = true
+itolib-time.workspace = true
+itolib-types.workspace = true
+itolib-math.workspace = true
+
+ordered-float.workspace = true
+day_count_conventions.workspace = true
+assert_approx_eq.workspace = true
+num.workspace = true

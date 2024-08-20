@@ -1,9 +1,30 @@
-[package]
-name = "itolib"
+[workspace]
+members = ["crates/*", "examples/*"]
+default-members = ["crates/itolib"]
+resolver = "2"
+
+[workspace.package]
 version = "0.0.1"
 edition = "2021"
+authors = ["Meet Patel <meet.s.patel.nj@gmail.com>"]
+homepage = "https://github.com/MeetThePatel/ItoLib/"
+repository = "https://github.com/MeetThePatel/ItoLib/"
+license-file = "LICENSE"
+readme = "README.md"
 
-[dependencies]
+[workspace.dependencies]
+# ItoLib
+itolib = { path = "crates/itolib" }
+itolib-instruments = { path = "crates/itolib-instruments" }
+itolib-macros = { path = "crates/itolib-macros" }
+itolib-math = { path = "crates/itolib-math" }
+itolib-money = { path = "crates/itolib-money" }
+itolib-term-structures = { path = "crates/itolib-term-structures" }
+itolib-types = { path = "crates/itolib-types" }
+itolib-time = { path = "crates/itolib-time" }
+
+# External
+assert_approx_eq = "1.1.0"
 day_count_conventions = { version = "0.1.7", features = ["hifitime"] }
 hifitime = "3.9.0"
 num = "0.4.3"
@@ -11,12 +32,3 @@ ordered-float = "4.2.2"
 permutation = "0.4.1"
 statrs = "0.17.1"
 thiserror = "1.0.63"
-
-[package.metadata.docs.rs]
-rustdoc-args = ["--html-in-header", "katex_header.html", "--cfg", "docsrs"]
-
-[[example]]
-name = "black_scholes"
-
-[dev-dependencies]
-assert_approx_eq = "1.1.0"

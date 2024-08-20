@@ -1,0 +1,17 @@
+[package]
+name = "itolib-money"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+itolib-types.workspace = true
+itolib-macros.workspace = true
+itolib-time.workspace = true
+
+ordered-float.workspace = true
+num.workspace = true
+assert_approx_eq.workspace = true
+day_count_conventions.workspace = true
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--html-in-header", "katex_header.html", "--cfg", "docsrs"]

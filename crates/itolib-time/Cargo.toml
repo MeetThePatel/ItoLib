@@ -1,0 +1,14 @@
+[package]
+name = "itolib-time"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+[dependencies]
+hifitime.workspace = true
+ordered-float.workspace = true
+num.workspace = true

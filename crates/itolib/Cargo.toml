@@ -1,0 +1,16 @@
+[package]
+name = "itolib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+itolib-instruments.workspace = true
+itolib-math.workspace = true
+itolib-money.workspace = true
+itolib-term-structures.workspace = true
+itolib-time.workspace = true
+itolib-types.workspace = true
+
+
+[package.metadata.docs.rs]
+rustdoc-args = ["--html-in-header", "katex_header.html", "--cfg", "docsrs"]

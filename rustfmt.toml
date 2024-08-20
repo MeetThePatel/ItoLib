@@ -1,2 +1,4 @@
 wrap_comments = true
 comment_width = 100
+merge_derives = false
+use_small_heuristics = "Max"
