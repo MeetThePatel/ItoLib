@@ -1,15 +1,15 @@
 use day_count_conventions::DayCounter;
-use num::Float;
+use itolib_types::Strike;
 use statrs::distribution::{ContinuousCDF, Normal};
 
-use crate::{
-    instruments::{EuropeanOption, Exercise, Option, OptionType},
-    money::{Currency, Money},
-    pricers::Pricer,
-    term_structures::{
-        YieldTermStructure, {BlackVolatilityTermStructure, BlackVolatilityTermStructureResult},
-    },
+use itolib_instruments::{EuropeanOption, Exercise, Option, OptionType};
+use itolib_money::{Currency, Money};
+use itolib_term_structures::{
+    volatility::{BlackVolatilityTermStructure, BlackVolatilityTermStructureResult},
+    yieldd::YieldTermStructure,
 };
+
+use crate::Pricer;
 
 pub struct AnalyticBlackScholesMerton<'a, C, D>
 where
@@ -31,11 +31,7 @@ where
         volatility_curve: &'a impl BlackVolatilityTermStructure<D>,
         yield_curve: &'a impl YieldTermStructure<C, D>,
     ) -> Self {
-        Self {
-            underlying_spot,
-            volatility_curve,
-            yield_curve,
-        }
+        Self { underlying_spot, volatility_curve, yield_curve }
     }
 }
 
@@ -58,10 +54,10 @@ where
 
         let s = self.underlying_spot;
 
-        let sigma = match self
-            .volatility_curve
-            .black_volatility(self.volatility_curve.get_reference_date(), s.into())
-        {
+        let sigma = match self.volatility_curve.black_volatility(
+            self.volatility_curve.get_reference_date(),
+            Strike::new(s.amount()).unwrap(),
+        ) {
             ExistingValue(v) | InterpolatedValue(v) => v,
             OutOfRange => panic!("Out of range."),
             NoPoints => panic!("No points."),
@@ -70,27 +66,30 @@ where
         // Discount factor.
         let d = self.yield_curve.discount_factor(t).unwrap();
         // Forward price of underlying.
-        let f: Money<C> = s / d;
+        let f: Money<C> = s / d.value().value();
 
-        let tau = dcc
-            .day_count_fraction(&self.volatility_curve.get_reference_date(), &t)
-            .get_fraction();
-        let d_plus =
-            (0.5 * *sigma * *sigma).mul_add(tau, *(f / k).ln().amount()) / *(sigma * tau.sqrt());
-        let d_minus = (*sigma).mul_add(-tau.sqrt(), d_plus);
+        let tau =
+            dcc.day_count_fraction(&self.volatility_curve.get_reference_date(), &t).get_fraction();
+        let d_plus = (0.5 * *sigma.value().value() * *sigma.value().value())
+            .mul_add(tau, (f / k).amount().value().ln())
+            / *(sigma.value().value() * tau.sqrt());
+        let d_minus = (*sigma.value().value()).mul_add(-tau.sqrt(), d_plus);
 
         let norm = Normal::standard();
         match option.get_option_type() {
             OptionType::CALL => {
-                let call_price = d * norm
-                    .cdf(d_plus)
-                    .mul_add(*f.amount(), -(norm.cdf(d_minus) * *k.amount()));
+                let call_price = d.value().value()
+                    * norm
+                        .cdf(d_plus)
+                        .mul_add(f.amount().into(), -(norm.cdf(d_minus) * k.amount().value()));
                 Money::new(call_price)
             }
             OptionType::PUT => {
-                let put_price = d * norm
-                    .cdf(-1.0 * d_minus)
-                    .mul_add(*k.amount(), -(norm.cdf(-1.0 * d_plus) * *f.amount()));
+                let put_price = d.value().value()
+                    * norm.cdf(-1.0 * d_minus).mul_add(
+                        k.amount().into(),
+                        -(norm.cdf(-1.0 * d_plus) * f.amount().value()),
+                    );
                 Money::new(put_price)
             }
         }

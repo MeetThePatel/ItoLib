@@ -1,0 +1,19 @@
+[package]
+name = "itolib-pricers"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license-file.workspace = true
+readme.workspace = true
+
+[dependencies]
+itolib-instruments.workspace = true
+itolib-money.workspace = true
+itolib-term-structures.workspace = true
+itolib-types.workspace = true
+
+day_count_conventions.workspace = true
+num.workspace = true
+statrs.workspace = true

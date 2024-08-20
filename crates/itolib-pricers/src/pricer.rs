@@ -1,10 +1,5 @@
-mod analytic_black_scholes_merton;
-pub use analytic_black_scholes_merton::AnalyticBlackScholesMerton;
-
-use crate::{
-    instruments::EuropeanOption,
-    money::{Currency, Money},
-};
+use itolib_instruments::EuropeanOption;
+use itolib_money::{Currency, Money};
 
 pub trait Pricer<C>
 where
