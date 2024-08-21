@@ -1,6 +1,5 @@
-use ordered_float::OrderedFloat;
-
 use crate::float::macros::impl_float;
+use crate::float::IntoFloat;
 
 // =============================================================================
 // Definition
@@ -12,8 +11,7 @@ use crate::float::macros::impl_float;
 #[repr(transparent)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-#[derive(Hash)]
-pub struct NonNegativeFloat(OrderedFloat<f64>);
+pub struct NonNegativeFloat(f64);
 
 // =============================================================================
 // Implementations
@@ -26,8 +24,14 @@ impl NonNegativeFloat {
         if float_repr.is_sign_negative() || float_repr.is_nan() {
             None
         } else {
-            Some(Self(OrderedFloat(float_repr)))
+            Some(Self(float_repr))
         }
+    }
+}
+
+impl IntoFloat for NonNegativeFloat {
+    fn as_f64(&self) -> f64 {
+        self.0
     }
 }
 

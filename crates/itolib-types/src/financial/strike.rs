@@ -1,5 +1,7 @@
 use crate::float::FiniteFloat;
 
+// TODO: Need to get rid of this and move to using an associated type.
+
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 #[derive(PartialEq, Eq)]

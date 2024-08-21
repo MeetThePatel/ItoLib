@@ -6,8 +6,8 @@ pub struct CompoundFactor(NonNegativeFiniteFloat);
 
 impl CompoundFactor {
     #[must_use]
-    pub fn new(value: impl Into<f64>) -> Self {
-        Self(NonNegativeFiniteFloat::new(value.into()).unwrap())
+    pub fn new(value: impl Into<f64>) -> Option<Self> {
+        Some(Self(NonNegativeFiniteFloat::new(value.into())?))
     }
 
     #[must_use]

@@ -28,6 +28,8 @@ assert_approx_eq = "1.1.0"
 day_count_conventions = { version = "0.1.7", features = ["hifitime"] }
 hifitime = "3.9.0"
 num = "0.4.3"
+num-derive = "0.4.2"
+num-traits = "0.2.19"
 ordered-float = "4.2.2"
 permutation = "0.4.1"
 statrs = "0.17.1"

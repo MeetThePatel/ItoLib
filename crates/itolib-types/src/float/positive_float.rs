@@ -1,6 +1,5 @@
-use ordered_float::OrderedFloat;
-
 use crate::float::macros::impl_float;
+use crate::float::IntoFloat;
 
 // =============================================================================
 // Definition
@@ -12,8 +11,7 @@ use crate::float::macros::impl_float;
 #[repr(transparent)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-#[derive(Hash)]
-pub struct PositiveFloat(OrderedFloat<f64>);
+pub struct PositiveFloat(f64);
 
 // =============================================================================
 // Implementations
@@ -24,10 +22,16 @@ impl PositiveFloat {
     pub fn new(value: impl Into<f64>) -> Option<Self> {
         let float_repr: f64 = value.into();
         if float_repr > 0.0 {
-            Some(Self(OrderedFloat(float_repr)))
+            Some(Self(float_repr))
         } else {
             None
         }
+    }
+}
+
+impl IntoFloat for PositiveFloat {
+    fn as_f64(&self) -> f64 {
+        self.0
     }
 }
 

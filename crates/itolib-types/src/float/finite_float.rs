@@ -1,6 +1,5 @@
-use ordered_float::OrderedFloat;
-
 use crate::float::macros::impl_float;
+use crate::float::IntoFloat;
 
 // =============================================================================
 // Definition
@@ -12,8 +11,7 @@ use crate::float::macros::impl_float;
 #[repr(transparent)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-#[derive(Hash)]
-pub struct FiniteFloat(OrderedFloat<f64>);
+pub struct FiniteFloat(f64);
 
 // =============================================================================
 // Implementations
@@ -26,8 +24,14 @@ impl FiniteFloat {
         if float_repr.is_infinite() || float_repr.is_nan() {
             None
         } else {
-            Some(Self(OrderedFloat(float_repr)))
+            Some(Self(float_repr))
         }
+    }
+}
+
+impl IntoFloat for FiniteFloat {
+    fn as_f64(&self) -> f64 {
+        self.0
     }
 }
 
@@ -38,7 +42,7 @@ mod tests {
     use core::f64;
     use std::cmp::Ordering;
 
-    use super::FiniteFloat;
+    use crate::float::FiniteFloat;
 
     #[test]
     fn domain() {
@@ -100,5 +104,25 @@ mod tests {
         assert_eq!(zero.partial_cmp(&negative_num).unwrap(), Ordering::Greater);
         assert_eq!(positive_num.partial_cmp(&negative_num).unwrap(), Ordering::Greater);
         assert_eq!(positive_num.partial_cmp(&zero).unwrap(), Ordering::Greater);
+    }
+
+    #[test]
+    fn operations() {
+        // ===========================================================
+        // Operations that stay in the domain.
+        // ===========================================================
+        assert_eq!(
+            FiniteFloat::new(1.0) + FiniteFloat::new(1.0).unwrap(),
+            Some(FiniteFloat::new(2.0).unwrap())
+        );
+        assert_eq!(
+            FiniteFloat::new(1.0).unwrap() - FiniteFloat::new(1.0).unwrap(),
+            Some(FiniteFloat::new(0.0).unwrap())
+        );
+
+        // ===========================================================
+        // Operations that leave the domain.
+        // ===========================================================
+        assert!((FiniteFloat::new(1.0).unwrap() + FiniteFloat::new(0.0)).is_some());
     }
 }

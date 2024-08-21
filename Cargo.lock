@@ -236,7 +236,6 @@ name = "itolib-types"
 version = "0.0.1"
 dependencies = [
  "num",
- "ordered-float",
 ]
 
 [[package]]

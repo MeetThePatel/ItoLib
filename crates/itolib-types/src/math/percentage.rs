@@ -1,5 +1,3 @@
-use ordered_float::OrderedFloat;
-
 use crate::float::FiniteFloat;
 
 #[derive(Debug)]
@@ -10,8 +8,8 @@ pub struct Percentage(FiniteFloat);
 
 impl Percentage {
     #[must_use]
-    pub fn new(value: impl Into<f64>) -> Self {
-        Self(FiniteFloat::new(value.into()).unwrap())
+    pub fn new(value: impl Into<f64>) -> Option<Self> {
+        Some(Self(FiniteFloat::new(value.into())?))
     }
 
     #[must_use]

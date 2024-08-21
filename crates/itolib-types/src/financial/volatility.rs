@@ -1,7 +1,5 @@
-use num::traits::NumOps;
-use ordered_float::OrderedFloat;
-
-use crate::float::NonNegativeFiniteFloat;
+use crate::financial::macros::impl_ops_self;
+use crate::float::{IntoFloat, NonNegativeFiniteFloat};
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -9,8 +7,8 @@ pub struct Volatility(NonNegativeFiniteFloat);
 
 impl Volatility {
     #[must_use]
-    pub fn new(value: impl Into<f64>) -> Self {
-        Self(NonNegativeFiniteFloat::new(value.into()).unwrap())
+    pub fn new(value: impl Into<f64>) -> Option<Self> {
+        Some(Self(NonNegativeFiniteFloat::new(value)?))
     }
 
     #[must_use]
@@ -21,67 +19,30 @@ impl Volatility {
 
 impl Default for Volatility {
     fn default() -> Self {
-        Self::new(0.0)
-    }
-}
-impl std::ops::Add for Volatility {
-    type Output = Self;
-
-    fn add(self, rhs: Self) -> Self::Output {
-        Self::new(self.value().value() + rhs.value().value())
+        Self::new(0.0).unwrap()
     }
 }
 
-impl std::ops::Sub for Volatility {
-    type Output = Self;
+impl_ops_self!(Volatility);
 
-    fn sub(self, rhs: Self) -> Self::Output {
-        Self::new(self.value().value() - rhs.value().value())
-    }
-}
-
-impl std::ops::Mul for Volatility {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        Self::new(self.value().value() * rhs.value().value())
-    }
-}
-
-impl std::ops::Div for Volatility {
-    type Output = Self;
-
-    fn div(self, rhs: Self) -> Self::Output {
-        Self::new(self.value().value() / rhs.value().value())
-    }
-}
-
-impl std::ops::Rem for Volatility {
-    type Output = Self;
-
-    fn rem(self, rhs: Self) -> Self::Output {
-        Self::new(self.value().value() % rhs.value().value())
-    }
-}
-
-impl From<Volatility> for OrderedFloat<f64> {
+impl From<Volatility> for f64 {
     fn from(val: Volatility) -> Self {
-        val.value().value()
+        val.0.as_f64()
     }
 }
 
-impl std::ops::Mul<OrderedFloat<f64>> for Volatility {
-    type Output = Self;
+// impl std::ops::Mul<f64> for Volatility {
+//     type Output = Self;
 
-    fn mul(self, rhs: OrderedFloat<f64>) -> Self::Output {
-        Self::new(self.value().value() * *rhs)
-    }
-}
+//     fn mul(self, rhs: f64) -> Self::Output {
+//         Self::new(self.value().value() * rhs)
+//     }
+// }
 
-impl std::ops::Div<OrderedFloat<f64>> for Volatility {
-    type Output = Self;
+// impl std::ops::Div<f64> for Volatility {
+//     type Output = Self;
 
-    fn div(self, rhs: OrderedFloat<f64>) -> Self::Output {
-        Self::new(self.value().value() / *rhs)
-    }
-}
+//     fn div(self, rhs: f64) -> Self::Output {
+//         Self::new(self.value().value() / *rhs)
+//     }
+// }
