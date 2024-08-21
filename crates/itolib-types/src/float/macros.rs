@@ -204,23 +204,44 @@ macro_rules! generate_float_comparison_impls {
 }
 pub(crate) use generate_float_comparison_impls;
 
-macro_rules! generate_float_conversions_impls {
+macro_rules! generate_fallible_conversion_impls {
     ($type_name: ident) => {
-        impl From<$type_name> for f64 {
-            fn from(value: $type_name) -> Self {
-                value.value()
+        impl TryFrom<f64> for $type_name {
+            type Error = &'static str;
+
+            fn try_from(value: f64) -> Result<Self, Self::Error> {
+                Self::new(value).ok_or("Value not in domain.")
+            }
+        }
+        impl TryFrom<f32> for $type_name {
+            type Error = &'static str;
+
+            fn try_from(value: f32) -> Result<Self, Self::Error> {
+                Self::new(value).ok_or("Value not in domain.")
             }
         }
     };
 }
-pub(crate) use generate_float_conversions_impls;
+pub(crate) use generate_fallible_conversion_impls;
+
+// macro_rules! generate_float_conversions_impls {
+//     ($type_name: ident) => {
+//         impl From<$type_name> for f64 {
+//             fn from(value: $type_name) -> Self {
+//                 value.value()
+//             }
+//         }
+//     };
+// }
+// pub(crate) use generate_float_conversions_impls;
 
 macro_rules! impl_float {
     ($type_name: ident) => {
         crate::float::macros::generate_float_impls!($type_name);
         crate::float::macros::generate_float_ops_impls!($type_name);
         crate::float::macros::generate_float_comparison_impls!($type_name);
-        crate::float::macros::generate_float_conversions_impls!($type_name);
+        crate::float::macros::generate_fallible_conversion_impls!($type_name);
+        // crate::float::macros::generate_float_conversions_impls!($type_name);
     };
 }
 pub(crate) use impl_float;
