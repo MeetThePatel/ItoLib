@@ -1,3 +1,19 @@
+/// This macro generates an unsafe constructor that does not do bounds checking.
+macro_rules! generate_unsafe_constructor {
+    ($type_name: ident) => {
+        impl $type_name {
+            #[doc = concat!("Create a new [`", stringify!($type_name), "`] without bounds checking.")]
+            #[doc = "# Safety\n This function assumes that you have handled bounds checking prior to calling this function."]
+            #[doc = "Else, this will cause UB (w.r.t. the strongly-typed float system."]
+            #[must_use]
+            pub const unsafe fn new_unchecked(val: f64) -> Self {
+                Self(val)
+            }
+        }
+    };
+}
+pub(crate) use generate_unsafe_constructor;
+
 /// This macro generates `Display` for the type.
 #[macro_export]
 macro_rules! generate_display {
@@ -271,7 +287,7 @@ macro_rules! generate_infallible_conversion_impls {
     ($from_type:ident, $to_type:ident $(, $rest:ident)*) => {
         impl From<$from_type> for $to_type {
             fn from(value: $from_type) -> Self {
-                $to_type::new(value.as_f64()).unwrap()
+                unsafe { $to_type::new_unchecked(value.as_f64()) }
             }
         }
         $crate::float::macros::generate_infallible_conversion_impls!($from_type,$($rest),*);
@@ -314,6 +330,7 @@ pub use generate_fallible_conversion_impls;
 #[macro_export]
 macro_rules! impl_float {
     ($type_name: ident) => {
+        $crate::float::macros::generate_unsafe_constructor!($type_name);
         $crate::float::macros::generate_display!($type_name);
         $crate::float::macros::generate_float_ops_impls!($type_name);
         $crate::float::macros::generate_float_comparison_impls!($type_name);
