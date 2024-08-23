@@ -9,7 +9,7 @@
 //! - [`PositiveFiniteFloat`]: $\overline{\mathbb{R}}^*_+ \coloneqq (0, \infty) \cup \lbrace \infty
 //!   \rbrace$
 
-pub(crate) mod macros;
+pub mod macros;
 
 mod into_float;
 pub use into_float::IntoFloat;
@@ -29,5 +29,8 @@ pub use positive_float::PositiveFloat;
 mod positive_finite_float;
 pub use positive_finite_float::PositiveFiniteFloat;
 
+/// Error type for typed float conversions.
+pub struct ConversionDomainError;
+
 // TODO: Create casting for restricting domain types. For example, FiniteFloat should trivially cast
-// without bounds checking to PositiveFloat.
+//       without bounds checking to PositiveFloat.

@@ -1,5 +1,7 @@
-use crate::float::macros::impl_float;
-use crate::float::IntoFloat;
+use crate::float::{
+    FiniteFloat, IntoFloat, NonNegativeFiniteFloat, NonNegativeFloat, PositiveFloat,
+};
+use crate::{generate_infallible_conversion_impls, impl_float};
 
 // =============================================================================
 // Definition
@@ -36,6 +38,14 @@ impl IntoFloat for PositiveFiniteFloat {
 }
 
 impl_float!(PositiveFiniteFloat);
+
+generate_infallible_conversion_impls!(
+    PositiveFiniteFloat,
+    PositiveFloat,
+    NonNegativeFloat,
+    NonNegativeFiniteFloat,
+    FiniteFloat
+);
 
 #[cfg(test)]
 mod tests {

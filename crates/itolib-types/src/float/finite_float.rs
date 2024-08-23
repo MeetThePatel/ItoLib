@@ -1,13 +1,16 @@
-use crate::float::macros::impl_float;
-use crate::float::IntoFloat;
+use num::Bounded;
 
+use crate::float::{
+    IntoFloat, NonNegativeFiniteFloat, NonNegativeFloat, PositiveFiniteFloat, PositiveFloat,
+};
+use crate::{generate_fallible_conversion_impls, impl_float};
 // =============================================================================
 // Definition
 // =============================================================================
 
 /// Finite floating point numbers.
 ///
-/// Elements of $\overline{\mathbb{R}} \coloneqq (-\infty), \infty).
+/// Elements of $\overline{\mathbb{R}} \coloneqq (-\infty), \infty)$.
 #[repr(transparent)]
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -35,11 +38,28 @@ impl IntoFloat for FiniteFloat {
     }
 }
 
+impl Bounded for FiniteFloat {
+    fn min_value() -> Self {
+        Self(f64::MIN)
+    }
+
+    fn max_value() -> Self {
+        Self(f64::MAX)
+    }
+}
+
 impl_float!(FiniteFloat);
+
+generate_fallible_conversion_impls!(
+    FiniteFloat,
+    NonNegativeFloat,
+    NonNegativeFiniteFloat,
+    PositiveFloat,
+    PositiveFiniteFloat
+);
 
 #[cfg(test)]
 mod tests {
-    use core::f64;
     use std::cmp::Ordering;
 
     use crate::float::FiniteFloat;

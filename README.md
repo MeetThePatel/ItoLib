@@ -12,6 +12,6 @@ ItoLib is library for quantitative finance in Rust with three main goals:
 - **Type Safety:** the library should prevent you from doing nonsensical things using the type system. For example, it is impossible to add two currencies together in ItoLib (without doing extra work).
 - **Speed:** the library should be fast.
 
-Contributions are welcome!
-
 To get started, head on over to the [wiki](https://github.com/MeetThePatel/ItoLib/wiki)!
+
+Contributions are welcome! Refer to the [contributing guidelines](https://github.com/MeetThePatel/ItoLib/blob/master/CONTRIBUTING.md).

@@ -30,13 +30,13 @@ impl<C: Currency> Money<C> {
     /// # Examples
     ///
     /// ```
-    /// # use itolib::money::Money;
-    /// # use itolib::money::currency::USD;
-    /// let x: Money<USD> = Money::new(1.0);
+    /// # use itolib_money::Money;
+    /// # use itolib_money::currency::USD;
+    /// let x: Money<USD> = Money::new(1.0).unwrap();
     /// ```
     #[must_use]
-    pub fn new(amount: impl Into<MonetaryNumber>) -> Self {
-        Self { amount: amount.into(), currency: PhantomData }
+    pub fn new(amount: impl TryInto<MonetaryNumber>) -> Option<Self> {
+        Self { amount: amount.try_into().ok()?, currency: PhantomData }
     }
 
     /// Get the amount.
@@ -125,7 +125,7 @@ where
     type Output = Self;
 
     fn mul(self, rhs: R) -> Self::Output {
-        Self::new((self.amount * rhs.into()).expect("Must result in finite money."))
+        Self::new((self.amount * rhs.into().value()).expect("Must result in finite money."))
     }
 }
 
@@ -138,7 +138,7 @@ where
 
     #[inline]
     fn div(self, rhs: R) -> Self::Output {
-        Self::new((self.amount / rhs.into()).expect("Must result in finite money."))
+        Self::new((self.amount / rhs.into().value()).expect("Must result in finite money."))
     }
 }
 
@@ -156,13 +156,13 @@ where
 
 impl<C: Currency> One for Money<C> {
     fn one() -> Self {
-        Self::new(1.0)
+        Self::new(MonetaryNumber::new(1.0).unwrap())
     }
 }
 
 impl<C: Currency> Zero for Money<C> {
     fn zero() -> Self {
-        Self::new((MonetaryNumber::new(0.0)).expect("Must result in finite money."))
+        Self::new((MonetaryNumber::new(0.0)).unwrap())
     }
 
     fn is_zero(&self) -> bool {

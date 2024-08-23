@@ -4,7 +4,7 @@ macro_rules! impl_add_self {
             type Output = Option<Self>;
 
             fn add(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.value() + rhs.0.value())
+                Self::new(self.0.as_f64() + rhs.0.as_f64())
             }
         }
     };
@@ -17,7 +17,7 @@ macro_rules! impl_sub_self {
             type Output = Option<Self>;
 
             fn sub(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.value() - rhs.0.value())
+                Self::new(self.0.as_f64() - rhs.0.as_f64())
             }
         }
     };
@@ -30,7 +30,7 @@ macro_rules! impl_mul_self {
             type Output = Option<Self>;
 
             fn mul(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.value() * rhs.0.value())
+                Self::new(self.0.as_f64() * rhs.0.as_f64())
             }
         }
     };
@@ -43,7 +43,7 @@ macro_rules! impl_div_self {
             type Output = Option<Self>;
 
             fn div(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.value() / rhs.0.value())
+                Self::new(self.0.as_f64() / rhs.0.as_f64())
             }
         }
     };
@@ -56,7 +56,7 @@ macro_rules! impl_rem_self {
             type Output = Option<Self>;
 
             fn rem(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.value() % rhs.0.value())
+                Self::new(self.0.as_f64() % rhs.0.as_f64())
             }
         }
     };
@@ -80,7 +80,7 @@ macro_rules! impl_mul_f64_like {
             type Output = Option<Self>;
 
             fn mul(self, rhs: T) -> Self::Output {
-                Self::new(self.0.value() * rhs.into())
+                Self::new(self.0.as_f64() * rhs.into())
             }
         }
     };
@@ -93,7 +93,7 @@ macro_rules! impl_div_f64_like {
             type Output = Option<Self>;
 
             fn div(self, rhs: T) -> Self::Output {
-                Self::new(self.0.value() / rhs.into())
+                Self::new(self.0.as_f64() / rhs.into())
             }
         }
     };

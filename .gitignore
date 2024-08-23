@@ -2,3 +2,4 @@
 lcov.info
 .DS_Store
 flamegraph.svg
+.idea/

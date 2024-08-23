@@ -28,6 +28,16 @@ impl_rem_self!(MonetaryNumber);
 impl_mul_f64_like!(MonetaryNumber);
 impl_div_f64_like!(MonetaryNumber);
 
+pub struct DomainError;
+
+impl TryInto<MonetaryNumber> for f64 {
+    type Error = DomainError;
+
+    fn try_into(self) -> Result<MonetaryNumber, Self::Error> {
+        MonetaryNumber::new(self).ok_or(DomainError)
+    }
+}
+
 impl Default for MonetaryNumber {
     fn default() -> Self {
         Self::new(0.0).unwrap()
