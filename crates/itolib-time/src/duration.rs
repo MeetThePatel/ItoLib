@@ -1,8 +1,6 @@
 use std::ops::{Add, Deref, DerefMut, Div, Mul, Sub};
 
-use hifitime::Unit::*;
 use hifitime::{Duration as hifidur, Unit};
-use ordered_float::OrderedFloat;
 
 /// This is a thin wrapper around `HifiTime`'s Duration.
 #[derive(Debug, Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
@@ -16,23 +14,23 @@ impl Duration {
 
     #[must_use]
     pub fn new_from_millis(millis: f64) -> Self {
-        Self(hifidur::from_f64(millis, Millisecond))
+        Self(hifidur::from_f64(millis, Unit::Millisecond))
     }
     #[must_use]
     pub fn new_from_seconds(seconds: f64) -> Self {
-        Self(hifidur::from_f64(seconds, Second))
+        Self(hifidur::from_f64(seconds, Unit::Second))
     }
     #[must_use]
     pub fn new_from_minutes(minutes: f64) -> Self {
-        Self(hifidur::from_f64(minutes, Minute))
+        Self(hifidur::from_f64(minutes, Unit::Minute))
     }
     #[must_use]
     pub fn new_from_hours(hours: f64) -> Self {
-        Self(hifidur::from_f64(hours, Hour))
+        Self(hifidur::from_f64(hours, Unit::Hour))
     }
     #[must_use]
     pub fn new_from_days(days: f64) -> Self {
-        Self(hifidur::from_f64(days, Day))
+        Self(hifidur::from_f64(days, Unit::Day))
     }
 }
 
@@ -118,14 +116,6 @@ impl Mul<Duration> for i64 {
         Duration(rhs.0 * self)
     }
 }
-/// `OrderedFloat` * Duration
-impl Mul<Duration> for OrderedFloat<f64> {
-    type Output = Duration;
-
-    fn mul(self, rhs: Duration) -> Self::Output {
-        Duration(rhs.0 * *self)
-    }
-}
 
 /// Duration / Duration
 impl Div<Self> for Duration {
@@ -156,7 +146,6 @@ impl Div<i64> for Duration {
 #[cfg(test)]
 mod tests {
     use hifitime::Unit;
-    use ordered_float::OrderedFloat;
 
     use crate::Duration;
 
@@ -191,9 +180,6 @@ mod tests {
         assert_eq!(dur + Unit::Minute, dur + dur);
         assert_eq!(Unit::Minute + dur, dur + dur);
         assert_eq!(dur - Unit::Minute, Duration::new_from_minutes(0.0));
-
-        assert_eq!(dur * OrderedFloat::<f64>(2.0), Duration::new_from_minutes(2.0));
-        assert_eq!(OrderedFloat::<f64>(2.0) * dur, Duration::new_from_minutes(2.0));
 
         assert_eq!(dur * 2.0, Duration::new_from_minutes(2.0));
         assert_eq!(2.0 * dur, Duration::new_from_minutes(2.0));

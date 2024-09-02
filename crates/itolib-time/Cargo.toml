@@ -10,5 +10,4 @@ readme.workspace = true
 
 [dependencies]
 hifitime.workspace = true
-ordered-float.workspace = true
 num.workspace = true

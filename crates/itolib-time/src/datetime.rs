@@ -2,7 +2,6 @@ use std::ops::{Add, Deref, DerefMut};
 use std::str::FromStr;
 
 use hifitime::prelude::*;
-use ordered_float::OrderedFloat;
 
 use crate::Duration;
 
@@ -110,11 +109,6 @@ impl From<DateTime> for f64 {
         value.0.to_utc_seconds()
     }
 }
-impl From<DateTime> for OrderedFloat<f64> {
-    fn from(value: DateTime) -> Self {
-        Self(value.0.to_utc_seconds())
-    }
-}
 
 /// `DateTime` + `Duration`
 impl Add<Duration> for DateTime {
@@ -143,7 +137,6 @@ impl std::fmt::Display for DateTime {
 mod test {
     use hifitime::Epoch;
     use num::ToPrimitive;
-    use ordered_float::OrderedFloat;
 
     use crate::{DateTime, Duration};
 
@@ -179,9 +172,6 @@ mod test {
 
         let int_repr = i64::from(dt);
         assert_eq!(dt.to_utc_seconds().to_i64().unwrap(), int_repr);
-
-        let ordered_float_repr = OrderedFloat::<f64>::from(dt);
-        assert_eq!(dt.to_utc_seconds(), *ordered_float_repr);
     }
 
     #[test]
