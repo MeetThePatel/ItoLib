@@ -1,32 +1,36 @@
 use crate::{
-    financial::macros::{
-        impl_add_self, impl_div_f64_like, impl_mul_f64_like, impl_rem_self, impl_sub_self,
-    },
-    float::{FiniteFloat, IntoFloat},
+    // financial::macros::{impl_ops_f64_like, impl_ops_self},
+    float::Float,
 };
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct MonetaryNumber(FiniteFloat);
+#[derive(PartialEq, Eq)]
+#[derive(PartialOrd, Ord)]
+pub struct MonetaryNumber(Float);
 
 impl MonetaryNumber {
+    /// Create a new [`MonetaryNumber`] with bounds-checking.
     #[must_use]
-    pub fn new(value: f64) -> Option<Self> {
-        Some(Self(FiniteFloat::new(value)?))
+    pub fn new(value: impl Into<f64>) -> Option<Self> {
+        let value: f64 = value.into();
+
+        if value.is_finite() {
+            Some(Self(Float::new(value)))
+        } else {
+            None
+        }
     }
 
+    /// Get the value contained inside.
     #[must_use]
     pub fn value(self) -> f64 {
-        self.0.as_f64()
+        *self.0
     }
 }
 
-impl_add_self!(MonetaryNumber);
-impl_sub_self!(MonetaryNumber);
-impl_rem_self!(MonetaryNumber);
-impl_mul_f64_like!(MonetaryNumber);
-impl_div_f64_like!(MonetaryNumber);
+// impl_ops_self!(MonetaryNumber);
+// impl_ops_f64_like!(MonetaryNumber);
 
 pub struct DomainError;
 

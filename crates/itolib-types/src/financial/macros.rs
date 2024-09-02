@@ -74,6 +74,32 @@ macro_rules! impl_ops_self {
 }
 pub(crate) use impl_ops_self;
 
+macro_rules! impl_add_f64_like {
+    ($type_name: ident) => {
+        impl<T: Into<f64>> std::ops::Add<T> for $type_name {
+            type Output = Option<Self>;
+
+            fn add(self, rhs: T) -> Self::Output {
+                Self::new(self.0.as_f64() + rhs.into())
+            }
+        }
+    };
+}
+pub(crate) use impl_add_f64_like;
+
+macro_rules! impl_sub_f64_like {
+    ($type_name: ident) => {
+        impl<T: Into<f64>> std::ops::Sub<T> for $type_name {
+            type Output = Option<Self>;
+
+            fn sub(self, rhs: T) -> Self::Output {
+                Self::new(self.0.as_f64() - rhs.into())
+            }
+        }
+    };
+}
+pub(crate) use impl_sub_f64_like;
+
 macro_rules! impl_mul_f64_like {
     ($type_name: ident) => {
         impl<T: Into<f64>> std::ops::Mul<T> for $type_name {
@@ -99,3 +125,27 @@ macro_rules! impl_div_f64_like {
     };
 }
 pub(crate) use impl_div_f64_like;
+
+macro_rules! impl_rem_f64_like {
+    ($type_name: ident) => {
+        impl<T: Into<f64>> std::ops::Rem<T> for $type_name {
+            type Output = Option<Self>;
+
+            fn rem(self, rhs: T) -> Self::Output {
+                Self::new(self.0.as_f64() % rhs.into())
+            }
+        }
+    };
+}
+pub(crate) use impl_rem_f64_like;
+
+macro_rules! impl_ops_f64_like {
+    ($type_name: ident) => {
+        $crate::financial::macros::impl_add_f64_like!($type_name);
+        $crate::financial::macros::impl_sub_f64_like!($type_name);
+        $crate::financial::macros::impl_mul_f64_like!($type_name);
+        $crate::financial::macros::impl_div_f64_like!($type_name);
+        $crate::financial::macros::impl_rem_f64_like!($type_name);
+    };
+}
+pub(crate) use impl_ops_f64_like;

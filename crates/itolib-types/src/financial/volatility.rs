@@ -1,18 +1,25 @@
-use crate::financial::macros::impl_ops_self;
-use crate::float::{IntoFloat, NonNegativeFiniteFloat};
+use crate::float::Float;
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-pub struct Volatility(NonNegativeFiniteFloat);
+#[derive(PartialEq, Eq)]
+#[derive(PartialOrd, Ord)]
+pub struct Volatility(Float);
 
 impl Volatility {
     #[must_use]
     pub fn new(value: impl Into<f64>) -> Option<Self> {
-        Some(Self(NonNegativeFiniteFloat::new(value)?))
+        let value: f64 = value.into();
+
+        if value >= 0.0 && value.is_finite() {
+            Some(Self(Float::new(value)))
+        } else {
+            None
+        }
     }
 
     #[must_use]
-    pub const fn value(&self) -> NonNegativeFiniteFloat {
+    pub const fn value(&self) -> Float {
         self.0
     }
 }
@@ -22,27 +29,3 @@ impl Default for Volatility {
         Self::new(0.0).unwrap()
     }
 }
-
-impl_ops_self!(Volatility);
-
-impl From<Volatility> for f64 {
-    fn from(val: Volatility) -> Self {
-        val.0.as_f64()
-    }
-}
-
-// impl std::ops::Mul<f64> for Volatility {
-//     type Output = Self;
-
-//     fn mul(self, rhs: f64) -> Self::Output {
-//         Self::new(self.value().value() * rhs)
-//     }
-// }
-
-// impl std::ops::Div<f64> for Volatility {
-//     type Output = Self;
-
-//     fn div(self, rhs: f64) -> Self::Output {
-//         Self::new(self.value().value() / *rhs)
-//     }
-// }

@@ -3,10 +3,8 @@
 #![allow(clippy::module_name_repetitions)]
 #![warn(clippy::nursery)]
 
-pub mod float;
+mod float;
+pub use float::Float;
 
 mod financial;
 pub use financial::{CompoundFactor, DiscountFactor, MonetaryNumber, Strike, Volatility};
-
-mod math;
-pub use math::Percentage;
