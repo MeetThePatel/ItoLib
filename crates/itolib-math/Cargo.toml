@@ -10,4 +10,4 @@ readme.workspace = true
 
 [dependencies]
 num.workspace = true
-ordered-float.workspace = true
+itolib-types.workspace = true

@@ -1,27 +1,14 @@
-use std::fmt::Debug;
 use std::ops::{Div, Mul};
 
+use itolib_types::Float;
 use num::traits::NumOps;
-use ordered_float::OrderedFloat;
 
-pub trait FloatScalable:
-    NumOps
-    + Mul<OrderedFloat<f64>, Output = Self>
-    + Div<OrderedFloat<f64>, Output = Self>
-    + Into<OrderedFloat<f64>>
-    + Debug
-    + Default
-    + Clone
+pub trait FloatLike:
+    NumOps + Mul<Float, Output = Self> + Div<Float, Output = Self> + Into<Float> + Clone
 {
 }
 
-impl<T> FloatScalable for T where
-    T: NumOps
-        + Mul<OrderedFloat<f64>, Output = Self>
-        + Div<OrderedFloat<f64>, Output = Self>
-        + Into<OrderedFloat<f64>>
-        + Debug
-        + Default
-        + Clone
+impl<T> FloatLike for T where
+    T: NumOps + Mul<Float, Output = Self> + Div<Float, Output = Self> + Into<Float> + Clone
 {
 }
