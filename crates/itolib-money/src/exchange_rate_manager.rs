@@ -3,11 +3,11 @@ use std::fmt::Display;
 
 use crate::{Currency, ExchangeRate, Money};
 use itolib_macros::any_true;
-use itolib_types::MonetaryNumber;
+use itolib_types::Float;
 
 #[derive(Debug, Default, Clone)]
 pub struct ExchangeRateManager<'a> {
-    exchange_rate_map: BTreeMap<(&'a str, &'a str), MonetaryNumber>,
+    exchange_rate_map: BTreeMap<(&'a str, &'a str), Float>,
 }
 
 #[allow(clippy::module_name_repetitions)]
@@ -49,7 +49,7 @@ impl<'a> ExchangeRateManager<'a> {
         let base_code = base_currency.alphabetic_code();
         let quote_code = quote_currency.alphabetic_code();
 
-        self.exchange_rate_map.insert((base_code, quote_code), rate.rate);
+        self.exchange_rate_map.insert((base_code, quote_code), rate.rate());
         Ok(())
     }
 
@@ -100,7 +100,7 @@ impl<'a> ExchangeRateManager<'a> {
     {
         let base_code = rate.get_base_currency().alphabetic_code();
         let quote_code = rate.get_quote_currency().alphabetic_code();
-        self.exchange_rate_map.insert((base_code, quote_code), rate.rate).map(ExchangeRate::new)
+        self.exchange_rate_map.insert((base_code, quote_code), rate.rate()).map(ExchangeRate::new)
     }
 
     pub fn remove<B, Q>(&mut self, base: &B, quote: &Q) -> Option<ExchangeRate<B, Q>>
@@ -155,8 +155,8 @@ impl<'a> Display for ExchangeRateManager<'a> {
         let _ = writeln!(f, "+-----------+----------------------+");
         let _ = writeln!(f, "| {:^9} | {:>20} |", "Pair", "Rate");
         let _ = writeln!(f, "+-----------+----------------------+");
-        for ((base_currency, quote_currency), rate) in &self.exchange_rate_map {
-            let _ = writeln!(f, "| {base_currency:^3} / {quote_currency:^3} | {rate:>20} |",);
+        for ((base_currency, quote_currency), &rate) in &self.exchange_rate_map {
+            let _ = writeln!(f, "| {base_currency:^3} / {quote_currency:^3} | {:>20} |", *rate);
         }
         let _ = writeln!(f, "+-----------+----------------------+");
         Ok(())
@@ -198,7 +198,7 @@ mod tests {
         // Test get.
         let rate = manager.get(&GBP::default(), &USD::default()).unwrap();
         // assert_approx_equal_f64!(rate.rate, 1.28510, 10e-8);
-        assert_approx_eq!(rate.rate.value(), 1.28510, 10e-8);
+        assert_approx_eq!(rate.rate(), 1.28510, 10e-8);
 
         // Test convert to base.
         let m1: Money<USD> = Money::new(1.0);
@@ -215,12 +215,12 @@ mod tests {
         manager.update(&gbpusd);
         let rate = manager.get(&GBP::default(), &USD::default()).unwrap();
         // assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
-        assert_approx_eq!(rate.rate.value(), 1.28512_f64, 10e-8);
+        assert_approx_eq!(rate.rate(), 1.28512_f64, 10e-8);
 
         // Test remove.
         let rate = manager.remove(&GBP::default(), &USD::default()).unwrap();
         // assert_approx_equal_f64!(rate.rate, 1.28512_f64, 10e-8);
-        assert_approx_eq!(rate.rate.value(), 1.28512_f64, 10e-8);
+        assert_approx_eq!(rate.rate(), 1.28512_f64, 10e-8);
 
         // Test clear.
         manager.clear();
@@ -249,6 +249,7 @@ mod tests {
 | USD / JPY |              153.638 |
 +-----------+----------------------+\n";
 
+        println!("{}", manager);
         assert_eq!(manager.to_string(), expected);
     }
 }

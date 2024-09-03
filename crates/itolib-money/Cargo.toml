@@ -8,7 +8,6 @@ itolib-types.workspace = true
 itolib-macros.workspace = true
 itolib-time.workspace = true
 
-ordered-float.workspace = true
 num.workspace = true
 assert_approx_eq.workspace = true
 day_count_conventions.workspace = true

@@ -2,14 +2,14 @@ use std::fmt::Display;
 use std::marker::PhantomData;
 
 use crate::{Currency, Money};
-use itolib_types::MonetaryNumber;
+use itolib_types::Float;
 
 pub struct ExchangeRate<B, Q>
 where
     B: Currency,
     Q: Currency,
 {
-    pub rate: MonetaryNumber,
+    rate: Float,
     base_currency: PhantomData<B>,
     quote_currency: PhantomData<Q>,
 }
@@ -20,12 +20,14 @@ where
     Q: Currency,
 {
     #[must_use]
-    pub fn new(rate: impl Into<f64>) -> Self {
-        Self {
-            rate: MonetaryNumber::new(rate.into()).expect("Must give finite interest rate."),
-            quote_currency: PhantomData,
-            base_currency: PhantomData,
-        }
+    pub fn new(rate: impl Into<Float>) -> Self {
+        let rate = rate.into();
+
+        Self { rate, base_currency: PhantomData, quote_currency: PhantomData }
+    }
+
+    pub fn rate(&self) -> Float {
+        self.rate
     }
 
     #[must_use]
@@ -42,12 +44,12 @@ where
     #[must_use]
     #[inline]
     pub fn convert_to_base(&self, rhs: &Money<Q>) -> Money<B> {
-        Money::new((rhs.amount() / self.rate).expect("Must result in finite interest rate."))
+        Money::new(rhs.amount() / self.rate)
     }
     #[must_use]
     #[inline]
     pub fn convert_to_quote(&self, rhs: &Money<B>) -> Money<Q> {
-        Money::new((rhs.amount() * self.rate).expect("Must result in finite interest rate"))
+        Money::new(rhs.amount() * self.rate())
     }
 }
 

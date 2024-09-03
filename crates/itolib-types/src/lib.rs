@@ -7,4 +7,4 @@ mod float;
 pub use float::Float;
 
 mod financial;
-pub use financial::{CompoundFactor, DiscountFactor, MonetaryNumber, Strike, Volatility};
+pub use financial::{CompoundFactor, DiscountFactor, Strike, Volatility};
