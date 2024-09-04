@@ -14,7 +14,6 @@ itolib-time.workspace = true
 itolib-types.workspace = true
 itolib-math.workspace = true
 
-ordered-float.workspace = true
 day_count_conventions.workspace = true
 assert_approx_eq.workspace = true
 num.workspace = true

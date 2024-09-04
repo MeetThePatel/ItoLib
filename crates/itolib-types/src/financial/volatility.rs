@@ -1,7 +1,7 @@
 use crate::financial::macros::impl_ops_self;
 use crate::float::Float;
 
-use super::macros::{impl_ops_f64_like, impl_try_from_float};
+use super::macros::{impl_into_float, impl_ops_f64_like, impl_try_from_float};
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
@@ -36,4 +36,5 @@ impl Default for Volatility {
 impl_ops_self!(Volatility);
 impl_ops_f64_like!(Volatility);
 
+impl_into_float!(Volatility);
 impl_try_from_float!(Volatility);

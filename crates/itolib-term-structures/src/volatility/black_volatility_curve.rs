@@ -138,9 +138,13 @@ where
         };
         match self.interpolator.interpolate(maturity) {
             InterpolationResult::ExistingValue(v) => ExistingValue(v),
-            InterpolationResult::InterpolatedValue(v) => InterpolatedValue(v),
+            InterpolationResult::InterpolatedValueOk(v) => InterpolatedValue(v),
             InterpolationResult::OutOfRange => OutOfRange,
             InterpolationResult::NoPoints => NoPoints,
+            // Cannot get a domain error. If both endpoints are in the domain, an interpolated
+            // value, by definition, must be as well (as the interpolation is on a line between the
+            // two endpoints).
+            InterpolationResult::InterpolatedValueDomainError => unreachable!(),
             _ => unreachable!(),
         }
     }

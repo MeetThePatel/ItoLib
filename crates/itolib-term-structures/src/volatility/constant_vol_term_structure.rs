@@ -1,13 +1,11 @@
 use day_count_conventions::DayCounter;
 use num::Bounded;
-use ordered_float::OrderedFloat;
-
-use itolib_time::DateTime;
-use itolib_types::{Strike, Volatility};
 
 use crate::volatility::{BlackVolatilityTermStructure, VolatilityTermStructure};
 use crate::TermStructure;
 use crate::TermStructureStrikeValidity;
+use itolib_time::DateTime;
+use itolib_types::{Strike, Volatility};
 
 use super::black_volatility_term_structure::BlackVolatilityTermStructureResult;
 
@@ -72,7 +70,7 @@ where
         self.volatility.map_or(
             Err(ConstantVolTermStructureBuilderError::NoVolatilityProvided),
             |volatility| {
-                if volatility.value() < OrderedFloat(0.0) {
+                if volatility.value() < 0.0 {
                     Err(ConstantVolTermStructureBuilderError::NegativeVolatility)
                 } else {
                     Ok(ConstantVolTermStructure {
@@ -111,12 +109,12 @@ where
         DateTime::new_from_ymd(9999, 12, 31)
     }
 
-    fn is_datetime_valid(&self, dt: DateTime) -> bool {
-        dt >= self.reference_date
-    }
-
     fn get_day_counter(&self) -> D {
         self.day_count_convention
+    }
+
+    fn is_datetime_valid(&self, dt: DateTime) -> bool {
+        dt >= self.reference_date
     }
 }
 

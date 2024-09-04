@@ -150,6 +150,17 @@ macro_rules! impl_ops_f64_like {
 }
 pub(crate) use impl_ops_f64_like;
 
+macro_rules! impl_into_float {
+    ($type_name: ident) => {
+        impl From<$type_name> for Float {
+            fn from(value: $type_name) -> Float {
+                value.value()
+            }
+        }
+    };
+}
+pub(crate) use impl_into_float;
+
 macro_rules! impl_try_from_float {
     ($type_name: ident) => {
         impl TryFrom<$crate::Float> for $type_name {
