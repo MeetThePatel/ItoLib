@@ -2,8 +2,6 @@ use std::fmt::Debug;
 
 use itolib_types::Float;
 
-use crate::FloatLike;
-
 /// Trait describing interpolation index requirements.
 #[allow(clippy::module_name_repetitions)]
 pub trait InterpolationIndex: Into<Float> + Ord + Clone {}
@@ -12,7 +10,7 @@ impl<T> InterpolationIndex for T where T: Into<Float> + Ord + Clone {}
 pub trait Interpolator<I, V>
 where
     I: InterpolationIndex,
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     /// Add a point to the interpolator.
     fn add_point(&mut self, point: (I, V)) -> Option<V>;
@@ -35,13 +33,14 @@ where
 
 #[allow(clippy::module_name_repetitions)]
 #[non_exhaustive]
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum InterpolationResult<V>
 where
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     ExistingValue(V),
-    InterpolatedValue(V),
+    InterpolatedValueOk(V),
+    InterpolatedValueDomainError,
     OutOfRange,
     NoPoints,
 }

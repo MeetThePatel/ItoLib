@@ -1,14 +1,10 @@
 use itolib_types::Float;
 
 use crate::interpolation::{InterpolationIndex, InterpolationResult, Interpolator};
-use crate::FloatLike;
 
 //  ------------------------------------------------------------------------------------------------
 //  Definition.
 //  ------------------------------------------------------------------------------------------------
-
-// TODO: Swap from BTreeMap -> Vec. Doesn't seem like insertions will be priority, and it adds the
-// requirement of Ord, while Vec implementation only requires PartialOrd.
 
 /// Linear Interpolator.
 ///
@@ -19,7 +15,7 @@ use crate::FloatLike;
 pub struct LinearInterpolator<I, V>
 where
     I: InterpolationIndex,
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     points: Vec<(I, V)>,
 }
@@ -27,7 +23,7 @@ where
 impl<I, V> LinearInterpolator<I, V>
 where
     I: InterpolationIndex,
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     /// Create a new `LinearInterpolator`.
     #[must_use]
@@ -47,7 +43,7 @@ where
 impl<I, V> Default for LinearInterpolator<I, V>
 where
     I: InterpolationIndex,
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     /// Create a new `LinearInterpolator`.
     fn default() -> Self {
@@ -62,7 +58,7 @@ where
 impl<I, V> Interpolator<I, V> for LinearInterpolator<I, V>
 where
     I: InterpolationIndex,
-    V: FloatLike,
+    V: Into<Float> + TryFrom<Float> + Copy,
 {
     /// Adds a point to the `LinearInterpolator`.
     ///
@@ -138,7 +134,7 @@ where
         let pos = self.points.binary_search_by(|(k, _)| k.cmp(&point));
 
         if let Ok(idx) = pos {
-            return InterpolationResult::ExistingValue(self.points[idx].1.clone());
+            return InterpolationResult::ExistingValue(self.points[idx].1);
         }
         let pos = pos.err().unwrap();
 
@@ -147,11 +143,18 @@ where
 
         let x_l: Float = (x_l).clone().into();
         let x_r: Float = (x_r).clone().into();
+        let y_l: Float = (*(y_l)).into();
+        let y_r: Float = (*(y_r)).into();
         let point: Float = point.into();
 
-        let val: V = y_l.clone() + (y_r.clone() - y_l.clone()) * (point - x_l) / (x_r - x_l);
+        let val: Float = y_l + (y_r - y_l) * (point - x_l) / (x_r - x_l);
 
-        InterpolationResult::InterpolatedValue(val)
+        let val = val.try_into();
+
+        match val {
+            Ok(v) => InterpolationResult::InterpolatedValueOk(v),
+            Err(_) => InterpolationResult::InterpolatedValueDomainError,
+        }
     }
 
     /// Returns the effective interpolation range of the `LinearInterpolator`.
@@ -207,7 +210,7 @@ mod tests {
         );
         assert_eq!(
             interpolator.interpolate(1.5),
-            InterpolationResult::InterpolatedValue(Float::new(15.0))
+            InterpolationResult::InterpolatedValueOk(Float::new(15.0))
         );
         assert_eq!(interpolator.interpolate(6.0), InterpolationResult::OutOfRange);
 
