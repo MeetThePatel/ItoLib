@@ -90,13 +90,13 @@ mod tests {
         assert_eq!(x.get_strike(), Money::new(100.0));
         assert_eq!(x.apply(Money::new(105.0)), Money::new(5.0));
         assert_eq!(x.apply(Money::new(95.0)), Money::new(0.0));
-        assert_eq!(x.to_string(), "$ 100.00 CALL");
+        assert_eq!(x.to_string(), "$ 100 CALL");
 
         let x: VanillaPayoff<USD> = VanillaPayoff::new(Money::new(100.0), OptionType::PUT);
         assert_eq!(x.get_option_type(), OptionType::PUT);
         assert_eq!(x.get_strike(), Money::new(100.0));
         assert_eq!(x.apply(Money::new(105.0)), Money::new(0.0));
         assert_eq!(x.apply(Money::new(95.0)), Money::new(5.0));
-        assert_eq!(x.to_string(), "$ 100.00 PUT");
+        assert_eq!(x.to_string(), "$ 100 PUT");
     }
 }

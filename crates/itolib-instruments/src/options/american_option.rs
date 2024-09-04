@@ -81,9 +81,9 @@ mod tests {
         let call = AmericanOption::new(call_payoff, exercise);
         let put = AmericanOption::new(put_payoff, exercise);
 
-        assert_eq!(call.to_string(), "2024/07/27 $ 30.00 C (A)");
-        assert_eq!(put.to_string(), "2024/07/27 $ 30.00 P (A)");
-        assert_eq!(call.get_payoff().to_string(), "$ 30.00 CALL");
+        assert_eq!(call.to_string(), "2024/07/27 $ 30 C (A)");
+        assert_eq!(put.to_string(), "2024/07/27 $ 30 P (A)");
+        assert_eq!(call.get_payoff().to_string(), "$ 30 CALL");
         assert_eq!(call.get_exercise().get_dates(), &[DateTime::new_from_ymd(2024, 7, 27)]);
     }
 }
