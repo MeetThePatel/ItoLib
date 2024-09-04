@@ -2,6 +2,7 @@ use std::ops::{Add, Deref, DerefMut};
 use std::str::FromStr;
 
 use hifitime::prelude::*;
+use itolib_types::Float;
 
 use crate::Duration;
 
@@ -107,6 +108,11 @@ impl From<DateTime> for i64 {
 impl From<DateTime> for f64 {
     fn from(value: DateTime) -> Self {
         value.0.to_utc_seconds()
+    }
+}
+impl From<DateTime> for Float {
+    fn from(value: DateTime) -> Self {
+        Float::new(value.0.to_utc_seconds())
     }
 }
 

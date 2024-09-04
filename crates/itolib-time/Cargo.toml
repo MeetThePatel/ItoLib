@@ -11,3 +11,4 @@ readme.workspace = true
 [dependencies]
 hifitime.workspace = true
 num.workspace = true
+itolib-types.workspace = true

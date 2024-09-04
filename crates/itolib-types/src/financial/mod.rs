@@ -1,4 +1,4 @@
-// pub mod macros;
+pub mod macros;
 
 pub mod discount_factor;
 pub use discount_factor::DiscountFactor;

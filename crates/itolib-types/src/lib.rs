@@ -8,3 +8,6 @@ pub use float::Float;
 
 mod financial;
 pub use financial::{CompoundFactor, DiscountFactor, Strike, Volatility};
+
+mod domain_error;
+pub use domain_error::DomainError;

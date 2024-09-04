@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 num.workspace = true
+thiserror.workspace = true
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "katex_header.html", "--cfg", "docsrs"]

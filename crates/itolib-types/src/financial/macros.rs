@@ -4,7 +4,7 @@ macro_rules! impl_add_self {
             type Output = Option<Self>;
 
             fn add(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.as_f64() + rhs.0.as_f64())
+                Self::new(self.0 + rhs.0)
             }
         }
     };
@@ -17,7 +17,7 @@ macro_rules! impl_sub_self {
             type Output = Option<Self>;
 
             fn sub(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.as_f64() - rhs.0.as_f64())
+                Self::new(self.0 - rhs.0)
             }
         }
     };
@@ -30,7 +30,7 @@ macro_rules! impl_mul_self {
             type Output = Option<Self>;
 
             fn mul(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.as_f64() * rhs.0.as_f64())
+                Self::new(self.0 * rhs.0)
             }
         }
     };
@@ -43,7 +43,7 @@ macro_rules! impl_div_self {
             type Output = Option<Self>;
 
             fn div(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.as_f64() / rhs.0.as_f64())
+                Self::new(self.0 / rhs.0)
             }
         }
     };
@@ -56,7 +56,7 @@ macro_rules! impl_rem_self {
             type Output = Option<Self>;
 
             fn rem(self, rhs: Self) -> Self::Output {
-                Self::new(self.0.as_f64() % rhs.0.as_f64())
+                Self::new(self.0 % rhs.0)
             }
         }
     };
@@ -80,7 +80,7 @@ macro_rules! impl_add_f64_like {
             type Output = Option<Self>;
 
             fn add(self, rhs: T) -> Self::Output {
-                Self::new(self.0.as_f64() + rhs.into())
+                Self::new(self.0 + rhs.into())
             }
         }
     };
@@ -93,7 +93,7 @@ macro_rules! impl_sub_f64_like {
             type Output = Option<Self>;
 
             fn sub(self, rhs: T) -> Self::Output {
-                Self::new(self.0.as_f64() - rhs.into())
+                Self::new(self.0 - rhs.into())
             }
         }
     };
@@ -106,7 +106,7 @@ macro_rules! impl_mul_f64_like {
             type Output = Option<Self>;
 
             fn mul(self, rhs: T) -> Self::Output {
-                Self::new(self.0.as_f64() * rhs.into())
+                Self::new(self.0 * rhs.into())
             }
         }
     };
@@ -119,7 +119,7 @@ macro_rules! impl_div_f64_like {
             type Output = Option<Self>;
 
             fn div(self, rhs: T) -> Self::Output {
-                Self::new(self.0.as_f64() / rhs.into())
+                Self::new(self.0 / rhs.into())
             }
         }
     };
@@ -132,7 +132,7 @@ macro_rules! impl_rem_f64_like {
             type Output = Option<Self>;
 
             fn rem(self, rhs: T) -> Self::Output {
-                Self::new(self.0.as_f64() % rhs.into())
+                Self::new(self.0 % rhs.into())
             }
         }
     };
@@ -149,3 +149,19 @@ macro_rules! impl_ops_f64_like {
     };
 }
 pub(crate) use impl_ops_f64_like;
+
+macro_rules! impl_try_from_float {
+    ($type_name: ident) => {
+        impl TryFrom<$crate::Float> for $type_name {
+            type Error = $crate::DomainError;
+
+            fn try_from(value: $crate::Float) -> Result<Self, Self::Error> {
+                match Self::new(value) {
+                    Some(v) => Ok(v),
+                    None => Err($crate::DomainError(value)),
+                }
+            }
+        }
+    };
+}
+pub(crate) use impl_try_from_float;
